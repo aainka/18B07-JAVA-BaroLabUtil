@@ -34,9 +34,9 @@ public class MailTest {
 		try {
 
 			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("from-email@gmail.com"));
+			message.setFrom(new InternetAddress("aainka@gmail.com"));
 			message.setRecipients(Message.RecipientType.TO,
-				InternetAddress.parse("aainka@gmail.com"));
+				InternetAddress.parse("aainka@gmail.com")); 
 			message.setSubject("Testing Subject");
 			message.setText("Dear Mail Crawler,"
 				+ "\n\n No spam to my email, please!");
