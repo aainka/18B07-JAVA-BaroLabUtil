@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 
@@ -19,9 +20,9 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-
-
 public abstract class ExcelObjectWriter extends ExcelObjectDefault {
+
+	public abstract int format(Cell cell, BeanAttribute attr , Object value);
 
 	protected static final int FORMAT_YET = 0;
 	protected static final int FORMAT_OK = 1;
@@ -32,8 +33,6 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 	private transient XSSFWorkbook workbook = new XSSFWorkbook();
 	private transient Sheet sheet;
 
-	public abstract int format(Cell cell, Field f, Object anObject);
-
 	private void init_w() {
 		{
 			cellStyleDate = workbook.createCellStyle();
@@ -43,9 +42,9 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		}
 		{
 			cellStyleHeader = workbook.createCellStyle();
-			//byte[] rgb = new byte[] { (byte) 200, (byte) 200, (byte) 200 };
-			XSSFColor color = new XSSFColor(new java.awt.Color(128,200,200)); // accepts a short value
-			cellStyleHeader.setFillForegroundColor((short)5) ;
+			// byte[] rgb = new byte[] { (byte) 200, (byte) 200, (byte) 200 };
+			XSSFColor color = new XSSFColor(new java.awt.Color(128, 200, 200)); // accepts a short value
+			cellStyleHeader.setFillForegroundColor((short) 5);
 			cellStyleHeader.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 			// XSSFFont hlink_font = workbook.createFont();
@@ -71,10 +70,16 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 	}
 
 	public void write(List<?> list, String sheetname, String filename) {
+
 		this.filename = filename;
 		this.clazz = list.get(0).getClass();
 		this.classname = clazz.getName();
 		this.count = list.size();
+		init();
+
+		if (sheetname == null) {
+			sheetname = "Sheet1";
+		}
 		sheet = workbook.createSheet(sheetname);
 		init_w();
 
@@ -90,7 +95,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		 */
 		{
 			Row row = sheet.createRow(rowIndex++);
-			
+
 			for (Field f : clazz.getDeclaredFields()) { // attribute name
 				Cell cell = row.createCell(colIndex++);
 				cell.setCellValue(f.getName());
@@ -104,30 +109,32 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		for (Object anObject : list) {
 			Row row = sheet.createRow(rowIndex++);
 			colIndex = 0;
-			for (Field f : clazz.getDeclaredFields()) { // attribute name
+			for (BeanAttribute attr : attrs) { // attribute name
 				Cell cell = row.createCell(colIndex++);
 				try {
-					if (format(cell, f, anObject) == FORMAT_OK) {
-						continue;
+					Object value = attr.getGetter().invoke(anObject, null);
+					if ( value == null ) continue;
+ 					if (format(cell, attr, value) != 0) {
+ 						continue;
+ 					}
+					if (value.getClass() == int.class || value.getClass() == Integer.class) {
+						cell.setCellValue((Integer)value);
 					}
-					if (f.getType() == int.class || f.getType() == Integer.class) {
-						cell.setCellValue(f.getInt(anObject));
+					if (value.getClass() == String.class) {
+						cell.setCellValue((String)value);
 					}
-					if (f.getType() == String.class) {
-						cell.setCellValue((String) f.get(anObject));
-					}
-					if (f.getType() == java.util.Date.class) {
-						java.util.Date vDate = (Date) f.get(anObject);
+					if (value.getClass() == java.util.Date.class) {
+						java.util.Date vDate = (Date) value;
 						if (vDate != null) {
 							cell.setCellValue(vDate);
 							cell.setCellStyle(cellStyleDate);
 						}
 					}
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				sheet.autoSizeColumn(colIndex-1);
+				sheet.autoSizeColumn(colIndex - 1);
 			}
 		}
 		try {
