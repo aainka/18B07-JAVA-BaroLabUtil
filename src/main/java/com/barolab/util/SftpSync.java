@@ -49,7 +49,7 @@ public class SftpSync extends SftpExample {
 
 	}
 
-	private void syncAll(File localDir, String remotePath) {
+	void syncAll(File localDir, String remotePath) {
 
 		debugf("\nsyncAll : localDir = " + localDir.getPath() + " " + localDir.listFiles().length);
 		debugf("          remoteDir = " + remotePath);
