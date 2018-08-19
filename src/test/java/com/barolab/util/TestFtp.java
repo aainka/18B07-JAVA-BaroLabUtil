@@ -27,15 +27,26 @@ public class TestFtp {
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.INFO);
 
-		host = "192.168.25.50";
-		host = "1.241.184.143";
 		port = 22;
 		user = "root";
 		password = "root123";
-		String localPath = "C:/@Workspace17A/18B07-BaroLabUtil-master";
-		String remotePath = "/root/AAA/18B07-BaroLabUtil";
-		testSync(localPath, remotePath);
+
+		host = "1.241.184.143";
+		localPath = "C:/@Workspace17A/18B07-BaroLabUtil-master";
+		remotePath = "/root/AAA/18B07-BaroLabUtil";
+		
+		homeEnv();
+		
+		testDownload(localPath, remotePath);
+
+		// testSync(localPath, remotePath);
 		// testClean(remotePath);
+	}
+
+	public void homeEnv() {
+		host = "192.168.25.50";
+		localPath = "C:/tmp2";
+		remotePath = "/root/BBB";
 	}
 
 	public void testClean(String remotePath) {
@@ -52,6 +63,15 @@ public class TestFtp {
 		syncFTP = new SftpSync(host, port, user, password);
 		syncFTP.connect();
 		syncFTP.syncUpload(localDir, remotePath);
+		syncFTP.disconnect();
+	}
+	
+	public void testDownload(String localPath, String remotePath) {
+		System.out.println("testDownload #############################");
+		File localDir = new File(localPath);
+		syncFTP = new SftpSync(host, port, user, password);
+		syncFTP.connect();
+		syncFTP.syncDownload(localDir, remotePath);
 		syncFTP.disconnect();
 	}
 

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.rmi.Remote;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -36,22 +38,22 @@ public class SftpSync extends SftpExample {
 		System.out.println("ERROR:" + msg);
 	}
 
-	public void test() {
-		String localPath = "C:/tmp";
-		String remotePath = "/root/BBB";
-
-		connect();
-		try {
-			sftpChannel.cd(remotePath);
-			File localDir = new File(localPath);
-			syncAll(localDir, remotePath);
-		} catch (SftpException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		disconnect();
-
-	}
+//	public void test() {
+//		String localPath = "C:/tmp";
+//		String remotePath = "/root/BBB";
+//
+//		connect();
+//		try {
+//			sftpChannel.cd(remotePath);
+//			File localDir = new File(localPath);
+//			syncAll(localDir, remotePath);
+//		} catch (SftpException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		disconnect();
+//
+//	}
 
 	public void rmdir(String remotePath) {
 		logger.info("rmdir0:=" + remotePath);
@@ -160,6 +162,33 @@ public class SftpSync extends SftpExample {
 			showTime("remote2.mtime = ", attr.getMTime() * (long) 1000);
 
 		} catch (SftpException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void syncDownload(File localDir, String remotePath) {
+		debugf("\nsyncAll : localDir = " + localDir.getPath() + " " + localDir.listFiles().length);
+		debugf("          remoteDir = " + remotePath);
+
+		if (!localDir.isDirectory()) {
+			error("arg is not directory. ");
+			return;
+		}
+		FileInfo fi = new FileInfo();
+		fi.setSftpChannel(sftpChannel);
+		try {
+			sftpChannel.cd(remotePath);
+			List<FileInfo> list = fi.lsdir(remotePath);
+			for ( FileInfo fp : list) {
+				if ( fp.isDirectory() ) {
+					// local directory make and cd
+					fp.syncDownload(localDir.mkdir(), remotePath+"/"+fp.getLsEntry().getFilename());
+				} else {
+					fp.get();
+				}
+			}
+		} catch (SftpException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
