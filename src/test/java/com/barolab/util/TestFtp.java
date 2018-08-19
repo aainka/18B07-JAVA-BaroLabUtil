@@ -34,7 +34,7 @@ public class TestFtp {
 		password = "root123";
 		String localPath = "C:/@Workspace17A/18B07-BaroLabUtil-master";
 		String remotePath = "/root/AAA/18B07-BaroLabUtil";
-		  testSync(localPath, remotePath);
+		testSync(localPath, remotePath);
 		// testClean(remotePath);
 	}
 
@@ -51,7 +51,7 @@ public class TestFtp {
 		File localDir = new File(localPath);
 		syncFTP = new SftpSync(host, port, user, password);
 		syncFTP.connect();
-		syncFTP.syncAll(localDir, remotePath);
+		syncFTP.syncUpload(localDir, remotePath);
 		syncFTP.disconnect();
 	}
 

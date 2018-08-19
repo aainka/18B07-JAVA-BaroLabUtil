@@ -72,7 +72,7 @@ public class SftpSync extends SftpExample {
 		}
 	}
 
-	public void syncAll(File localDir, String remotePath) {
+	public void syncUpload(File localDir, String remotePath) {
 
 		debugf("\nsyncAll : localDir = " + localDir.getPath() + " " + localDir.listFiles().length);
 		debugf("          remoteDir = " + remotePath);
@@ -86,7 +86,7 @@ public class SftpSync extends SftpExample {
 		fi.cd_mkdir(remotePath);
 		for (File child : localDir.listFiles()) {
 			if (child.isDirectory()) {
-				syncAll(child, remotePath + "/" + child.getName());
+				syncUpload(child, remotePath + "/" + child.getName());
 			} else {
 				fi.put(child);
 			}
