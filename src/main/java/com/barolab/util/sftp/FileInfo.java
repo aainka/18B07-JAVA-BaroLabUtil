@@ -1,12 +1,8 @@
 package com.barolab.util.sftp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -118,29 +114,12 @@ public class FileInfo {
 			 * Sync Time
 			 */
 			SftpATTRS attr = sftpChannel.lstat(file.getName());
-			attr.setACMODTIME(attr.getATime(), (int) (file.lastModified() / 1000));
+			attr.setACMODTIME(attr.getATime(), (int) (file.lastModified()  / 1000));
 			sftpChannel.setStat(file.getName(), attr);
 		} catch (SftpException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public void get() throws SftpException, IOException {
-		byte[] buffer = new byte[1024];
-		String filename = lsEntry.getFilename();
-
-		// File newFile = new File(localDir + "/" + file.getName());
-		File file = new File(filename);
-		BufferedInputStream bis = new BufferedInputStream(sftpChannel.get(filename));
-		OutputStream os = new FileOutputStream(file);
-		BufferedOutputStream bos = new BufferedOutputStream(os);
-		int readCount;
-		while ((readCount = bis.read(buffer)) > 0) {
-			bos.write(buffer, 0, readCount);
-		}
-		bis.close();
-		bos.close();
 	}
 
 }

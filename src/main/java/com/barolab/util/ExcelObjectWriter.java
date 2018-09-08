@@ -84,8 +84,8 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		init_w();
 
 		////////////////////////////////////////////
-		System.out.println(LogUtil.dump(this));
-		System.out.println("End");
+//		System.out.println(LogUtil.dump(this));
+//		System.out.println("End");
 		// Class clazz = OV_Issue.class;
 		int colIndex = 0;
 		int rowIndex = 0;
@@ -102,13 +102,15 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 				cell.setCellStyle(cellStyleHeader);
 			}
 		}
-
+		System.out.println("Excel Heading ");
 		/*
 		 * Body Writing
 		 */
+		int count = 0;
 		for (Object anObject : list) {
 			Row row = sheet.createRow(rowIndex++);
 			colIndex = 0;
+		//	System.out.println("Excel body "+(count++));
 			for (BeanAttribute attr : attrs) { // attribute name
 				Cell cell = row.createCell(colIndex++);
 				try {
@@ -117,6 +119,9 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
  					if (format(cell, attr, value) != 0) {
  						continue;
  					}
+ 					if (value.getClass() == float.class || value.getClass() == Float.class) {
+						cell.setCellValue((Float)value);
+					}
 					if (value.getClass() == int.class || value.getClass() == Integer.class) {
 						cell.setCellValue((Integer)value);
 					}
@@ -134,9 +139,15 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				sheet.autoSizeColumn(colIndex - 1);
 			}
+			
 		}
+		
+		colIndex = 0;
+		for (Field f : clazz.getDeclaredFields()) { // attribute name
+			sheet.autoSizeColumn(colIndex ++);
+		}
+		
 		try {
 			FileOutputStream out = new FileOutputStream(new File(filename));
 			workbook.write(out);
@@ -145,5 +156,9 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	
+	public void debugf(String msg) {
+		System.out.println("Ex: "+msg);
 	}
 }
