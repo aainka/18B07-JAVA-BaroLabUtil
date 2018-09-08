@@ -32,9 +32,17 @@ public class TestFtp {
 		port = 22;
 		user = "root";
 		password = "root123";
-		String localPath = "C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil";
-		String remotePath = "/root/AAA/18B07-BaroLabUtil";
+		
+		String project_id = "18B07-BaroLabUtil";
+		String localPath = "C:/@SWDevelopment/workspace-java/" + project_id;
+		String remotePath = "/root/AAA/" + project_id;
 		testSync(localPath, remotePath);
+
+		project_id = "18004-DashConsole";
+		localPath = "C:/@SWDevelopment/workspace-java/" + project_id;
+		remotePath = "/root/AAA/" + project_id;
+		testSync(localPath, remotePath);
+
 		// testClean(remotePath);
 	}
 
