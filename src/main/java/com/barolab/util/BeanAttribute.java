@@ -8,12 +8,14 @@ import lombok.Data;
 @Data
 
 public class BeanAttribute {
-	String name;
-	Class Type;
-	Method getter, setter;
-	Class clazz;
+	private int index;
+	private String name;
+	private Class Type;
+	private Method getter, setter;
+	private Class clazz;
 
-	public void init(Field f) {
+	public BeanAttribute init(Field f, int index) {
+		this.index = index;
 		name = f.getName();
 		Type = f.getType();
 		try {
@@ -24,6 +26,8 @@ public class BeanAttribute {
 			setter = clazz.getMethod(funcName, argTypes);
 		} catch (NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
+			return null;
 		}
+		return this;
 	}
 }

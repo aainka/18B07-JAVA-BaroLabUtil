@@ -32,6 +32,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 	private transient CellStyle cellStyleHeader;
 	private transient XSSFWorkbook workbook = new XSSFWorkbook();
 	private transient Sheet sheet;
+	BeanClass beanClass = new BeanClass();
 
 	private void init_w() {
 		{
@@ -75,7 +76,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		this.clazz = list.get(0).getClass();
 		this.classname = clazz.getName();
 		this.count = list.size();
-		init();
+		beanClass.init(clazz);
 
 		if (sheetname == null) {
 			sheetname = "Sheet1";
@@ -87,7 +88,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 //		System.out.println(LogUtil.dump(this));
 //		System.out.println("End");
 		// Class clazz = OV_Issue.class;
-		int colIndex = 0;
+	//	int colIndex = 0;
 		int rowIndex = 0;
 
 		/*
@@ -96,23 +97,23 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		{
 			Row row = sheet.createRow(rowIndex++);
 
-			for (Field f : clazz.getDeclaredFields()) { // attribute name
-				Cell cell = row.createCell(colIndex++);
-				cell.setCellValue(f.getName());
+		//	for (Field f : clazz.getDeclaredFields()) { // attribute name
+				for (BeanAttribute attr : beanClass.attrs) { // attribute name
+				Cell cell = row.createCell(attr.getIndex());
+				cell.setCellValue(attr.getName());
 				cell.setCellStyle(cellStyleHeader);
 			}
 		}
-		System.out.println("Excel Heading ");
 		/*
 		 * Body Writing
 		 */
 		int count = 0;
 		for (Object anObject : list) {
 			Row row = sheet.createRow(rowIndex++);
-			colIndex = 0;
+		//	colIndex = 0;
 		//	System.out.println("Excel body "+(count++));
-			for (BeanAttribute attr : attrs) { // attribute name
-				Cell cell = row.createCell(colIndex++);
+			for (BeanAttribute attr :  beanClass.attrs) { // attribute name
+				Cell cell = row.createCell(attr.getIndex());
 				try {
 					Object value = attr.getGetter().invoke(anObject, null);
 					if ( value == null ) continue;
@@ -143,9 +144,9 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 			
 		}
 		
-		colIndex = 0;
-		for (Field f : clazz.getDeclaredFields()) { // attribute name
-			sheet.autoSizeColumn(colIndex ++);
+	//	colIndex = 0;
+		for (BeanAttribute attr : beanClass.attrs) { // attribute name
+			sheet.autoSizeColumn(attr.getIndex());
 		}
 		
 		try {

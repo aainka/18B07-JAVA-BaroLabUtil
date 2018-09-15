@@ -3,6 +3,7 @@ package com.barolab.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,14 +22,13 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 
 	private Field[] vfields = new Field[100];
 	private DataFormatter dataFormatter = new DataFormatter();
+	BeanClass beanClass = new BeanClass();
+	private List<BeanAttribute> colAttrs = new LinkedList<BeanAttribute>(); 
 
-	public void init() {
-
-	}
-	
-	public List<?> read(Class clazz, String sheetname, String filename){
+	public List<?> read(Class clazz, String sheetname, String filename) {
+		beanClass.init(clazz);
 		try {
-			return read0(clazz,sheetname, filename);
+			return read0(clazz, sheetname, filename);
 		} catch (EncryptedDocumentException | InvalidFormatException | InstantiationException | IllegalAccessException
 				| IOException e) {
 			// TODO Auto-generated catch block
@@ -40,7 +40,7 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 	public List<?> read0(Class clazz, String sheetname, String filename) throws EncryptedDocumentException,
 			InvalidFormatException, IOException, InstantiationException, IllegalAccessException {
 
-		this.clazz = clazz;
+		//this.clazz = clazz;
 		Sheet sheet = null;
 		FileInputStream fileInputStream = new FileInputStream(filename);
 		Workbook workbook = WorkbookFactory.create(fileInputStream);
@@ -57,12 +57,10 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 		Row row0 = sheet.getRow(0);
 		for (Cell cell : row0) {
 			String name = cell.getStringCellValue();
-			try {
-				Field f = clazz.getField(name);
-				vfields[cell.getColumnIndex()] = f;
-			} catch (NoSuchFieldException | SecurityException e) {
-				e.printStackTrace();
-			}
+			BeanAttribute attr = beanClass.findAttribute(name);
+			colAttrs.add(attr);
+//			System.out.println("read at column0 index = "+cell.getColumnIndex());
+
 		}
 
 		/**
@@ -72,34 +70,43 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 		for (Row row : sheet) {
 			if (row.getRowNum() == 0)
 				continue;
-
-			// OV_Issue x = new OV_Issue();
 			Object valueObject = clazz.newInstance();
 			for (Cell cell : row) {
 				CellType type = cell.getCellTypeEnum();
-				Field f = vfields[cell.getColumnIndex()];
+				if ( cell.getColumnIndex() > colAttrs.size()) {
+					continue;
+				}
+			//	System.out.println("read at column index = "+cell.getColumnIndex());
+				BeanAttribute attr = colAttrs.get(cell.getColumnIndex());
+				
+			//	Field f = vfields[cell.getColumnIndex()];
 				try {
 					switch (type.getCode()) {
 					case 0: // numeric and date
-						if (f.getType() == int.class) {
+						if (attr.getType() == int.class) {
 							int v0 = (int) cell.getNumericCellValue();
-							f.set(valueObject, v0);
+							attr.getSetter().invoke(valueObject, v0);
 						}
-						if (f.getType() == Date.class) {
+						if (attr.getType() == Date.class) {
 							Date v0 = cell.getDateCellValue();
-							f.set(valueObject, v0);
+							attr.getSetter().invoke(valueObject, v0);
+						}
+						if (attr.getType() == String.class) {
+							int v0 = (int) cell.getNumericCellValue();
+							String s = "" + v0;
+							attr.getSetter().invoke(valueObject, s);
 						}
 						break;
 					case 1: // String
 						String value = cell.getStringCellValue();
-						f.set(valueObject, value);
+						attr.getSetter().invoke(valueObject, value);
 						break;
 					case 3: // BLANK
 						break;
 					default:
-						System.out.println("[ERROR] type = " + type + " name=" + f.getName());
+						System.out.println("[ERROR] type = " + type + " name=" + attr.getName());
 					}
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
