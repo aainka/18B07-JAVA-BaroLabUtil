@@ -16,10 +16,10 @@ public class BeanClass {
 			attr.setClazz(clazz);
 			if (attr.init(f, count) != null) {
 				attrs.add(attr);
-				System.out.println( "init.attr = " + f.getName()+ " "+count);
+			//	System.out.println( "init.attr = " + f.getName()+ " "+count);
 				count++;
 			} else {
-				System.out.println("init.attr.nok = " + f.getName()+ " "+count);
+			//	System.out.println("init.attr.nok = " + f.getName()+ " "+count);
 			}
 			
 		}

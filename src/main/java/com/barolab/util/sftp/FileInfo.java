@@ -105,6 +105,10 @@ public class FileInfo {
 	}
 
 	public void put(File file) {
+		if ( file.getName().indexOf(".class")>1) {
+			System.out.println("put::SKIP.CLASS xxxx "+file.getName());
+			return;
+		}
 		try {
 			System.out.println("put: " + file.getAbsolutePath());
 			FileInputStream fis = new FileInputStream(file);
