@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class ExcelObjectDefault {
 	protected String filename;
 	protected String classname;
-	protected transient Class clazz;
+//	protected transient Class clazz;
 
 
 	public void debugf(String s) {

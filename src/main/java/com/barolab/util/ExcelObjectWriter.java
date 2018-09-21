@@ -3,7 +3,6 @@ package com.barolab.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 
-	public abstract int format(Cell cell, BeanAttribute attr , Object value);
+	public abstract int format(Cell cell, BeanAttribute attr, Object value);
 
 	protected static final int FORMAT_YET = 0;
 	protected static final int FORMAT_OK = 1;
@@ -70,13 +69,19 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		cell.setCellStyle(cellStyleHref);
 	}
 
-	public void write(List<?> list, String sheetname, String filename) {
+	public void write(List<?> list, Class elementClass, String sheetname, String filename) {
 
 		this.filename = filename;
-		this.clazz = list.get(0).getClass();
-		this.classname = clazz.getName();
 		this.count = list.size();
-		beanClass.init(clazz);
+		beanClass.init(elementClass);
+		
+		if ( list.size() > 0 ) {
+			Class a = list.get(0).getClass();
+			if ( !a.equals(elementClass)) {
+				System.out.println("ERROR element.class = "+a.getName());
+				return;
+			}
+		}
 
 		if (sheetname == null) {
 			sheetname = "Sheet1";
@@ -85,10 +90,6 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		init_w();
 
 		////////////////////////////////////////////
-//		System.out.println(LogUtil.dump(this));
-//		System.out.println("End");
-		// Class clazz = OV_Issue.class;
-	//	int colIndex = 0;
 		int rowIndex = 0;
 
 		/*
@@ -97,8 +98,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		{
 			Row row = sheet.createRow(rowIndex++);
 
-		//	for (Field f : clazz.getDeclaredFields()) { // attribute name
-				for (BeanAttribute attr : beanClass.attrs) { // attribute name
+			for (BeanAttribute attr : beanClass.attrs) { // attribute name
 				Cell cell = row.createCell(attr.getIndex());
 				cell.setCellValue(attr.getName());
 				cell.setCellStyle(cellStyleHeader);
@@ -107,27 +107,25 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		/*
 		 * Body Writing
 		 */
-		int count = 0;
 		for (Object anObject : list) {
 			Row row = sheet.createRow(rowIndex++);
-		//	colIndex = 0;
-		//	System.out.println("Excel body "+(count++));
-			for (BeanAttribute attr :  beanClass.attrs) { // attribute name
+			for (BeanAttribute attr : beanClass.attrs) { // attribute name
 				Cell cell = row.createCell(attr.getIndex());
 				try {
 					Object value = attr.getGetter().invoke(anObject, null);
-					if ( value == null ) continue;
- 					if (format(cell, attr, value) != 0) {
- 						continue;
- 					}
- 					if (value.getClass() == float.class || value.getClass() == Float.class) {
-						cell.setCellValue((Float)value);
+					if (value == null)
+						continue;
+					if (format(cell, attr, value) != 0) {
+						continue;
+					}
+					if (value.getClass() == float.class || value.getClass() == Float.class) {
+						cell.setCellValue((Float) value);
 					}
 					if (value.getClass() == int.class || value.getClass() == Integer.class) {
-						cell.setCellValue((Integer)value);
+						cell.setCellValue((Integer) value);
 					}
 					if (value.getClass() == String.class) {
-						cell.setCellValue((String)value);
+						cell.setCellValue((String) value);
 					}
 					if (value.getClass() == java.util.Date.class) {
 						java.util.Date vDate = (Date) value;
@@ -141,14 +139,14 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 					e.printStackTrace();
 				}
 			}
-			
+
 		}
-		
-	//	colIndex = 0;
+
+		// colIndex = 0;
 		for (BeanAttribute attr : beanClass.attrs) { // attribute name
 			sheet.autoSizeColumn(attr.getIndex());
 		}
-		
+
 		try {
 			FileOutputStream out = new FileOutputStream(new File(filename));
 			workbook.write(out);
@@ -158,8 +156,8 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 			e1.printStackTrace();
 		}
 	}
-	
+
 	public void debugf(String msg) {
-		System.out.println("Ex: "+msg);
+		System.out.println("Ex: " + msg);
 	}
 }
