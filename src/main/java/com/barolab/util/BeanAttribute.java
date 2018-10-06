@@ -4,9 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import lombok.Data;
+import lombok.extern.java.Log;
 
 @Data
-
+@Log
 public class BeanAttribute {
 	private int index;
 	private String name;
@@ -25,7 +26,8 @@ public class BeanAttribute {
 			Class[] argTypes = new Class[] { f.getType() };
 			setter = clazz.getMethod(funcName, argTypes);
 		} catch (NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			log.finer("BeanAttribute skip attribute = " + f.getName());
 			return null;
 		}
 		return this;

@@ -3,6 +3,11 @@ package com.barolab.util;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 
+import lombok.Data;
+import lombok.extern.java.Log;
+
+@Log
+@Data
 public class BeanClass {
 	LinkedList<BeanAttribute> attrs = new LinkedList<BeanAttribute>();
 	private Class clazz;
@@ -16,19 +21,19 @@ public class BeanClass {
 			attr.setClazz(clazz);
 			if (attr.init(f, count) != null) {
 				attrs.add(attr);
-			//	System.out.println( "init.attr = " + f.getName()+ " "+count);
+				// System.out.println( "init.attr = " + f.getName()+ " "+count);
 				count++;
 			} else {
-			//	System.out.println("init.attr.nok = " + f.getName()+ " "+count);
+				// System.out.println("init.attr.nok = " + f.getName()+ " "+count);
 			}
-			
+
 		}
 	}
 
 	public BeanAttribute findAttribute(String name) {
 		for (BeanAttribute attr : attrs) {
-			if ( attr.getName().equals(name)) {
-				System.out.println("Found attribute name "+name);
+			if (attr.getName().equals(name)) {
+				log.finer("Found attribute name " + name);
 				return attr;
 			}
 		}

@@ -18,6 +18,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import lombok.extern.java.Log;
+
+@Log
 public class ExcelObjectReader extends ExcelObjectDefault {
 
 	private Field[] vfields = new Field[100];
@@ -116,7 +119,7 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 			}
 			list.add(valueObject);
 		}
-		System.out.println(" read.count = " + list.size());
+		log.info(beanClass.getClazz().getSimpleName()+"("+list.size()+")");
 		return list;
 	}
 }
