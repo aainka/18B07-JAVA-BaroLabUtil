@@ -15,30 +15,36 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
 import lombok.Data;
+import lombok.extern.java.Log;
 
 @Data
-
+@Log
 public class FileInfo {
 
-	private Logger logger = Logger.getLogger(this.getClass());
+//	private Logger logger = log.getLogger(this.getClass());
 	private LsEntry lsEntry;
 	private ChannelSftp sftpChannel;
 	private String remotePath;
 
 	public FileInfo(LsEntry lsEntry, String remotePath, ChannelSftp sftpChannel) {
 		this.sftpChannel = sftpChannel;
-		logger.info(("fileInfo = " + lsEntry.getFilename()));
+	//	log.info(("fileInfo = " + lsEntry.getFilename()));
 		this.lsEntry = lsEntry;
 		this.remotePath = remotePath;
+	}
+	
+	public String toString() {
+		String s = new String();
+		s += "name="+lsEntry.getFilename();
+		s += ", access="+lsEntry.getAttrs().getAtimeString();
+		s += ", modify="+lsEntry.getAttrs().getMtimeString();
+		return s;
 	}
 
 	public FileInfo() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public String toString() {
-		return lsEntry.getFilename();
-	}
 
 	public boolean isDirectory() {
 		SftpATTRS attr = lsEntry.getAttrs();
@@ -50,7 +56,7 @@ public class FileInfo {
 	}
 
 	public void rmdir() throws SftpException {
-		logger.info("rmdir : " + remotePath);
+		log.info("rmdir : " + remotePath);
 		/**
 		 * check directory empty
 		 */
@@ -66,10 +72,20 @@ public class FileInfo {
 		sftpChannel.cd("..");
 		sftpChannel.rmdir(lsEntry.getFilename());
 	}
+	
+	public List<FileInfo> getFiles(String remotePath) throws SftpException {
+		log.info("getFiles.Remote" + remotePath);
+		LinkedList<FileInfo> fileInfos = new LinkedList<FileInfo>();
+		Vector filelist = sftpChannel.ls("*");
+		for (int i = 0; i < filelist.size(); i++) {
+			fileInfos.add(new FileInfo((LsEntry) filelist.get(i), remotePath, sftpChannel));
+		}
+		return fileInfos;
+	}
 
 	public List<FileInfo> lsdir(String remotePath) throws SftpException {
 		LinkedList<FileInfo> fileInfos = new LinkedList<FileInfo>();
-		logger.info("lsdir : " + remotePath);
+		log.info("lsdir : " + remotePath);
 		sftpChannel.cd(remotePath);
 		Vector filelist = sftpChannel.ls("*");
 		for (int i = 0; i < filelist.size(); i++) {
@@ -106,11 +122,11 @@ public class FileInfo {
 
 	public void put(File file) {
 		if ( file.getName().indexOf(".class")>1) {
-			System.out.println("put::SKIP.CLASS xxxx "+file.getName());
+			log.fine("put::SKIP.CLASS xxxx "+file.getName());
 			return;
 		}
 		try {
-			System.out.println("put: " + file.getAbsolutePath());
+			log.info("put: " + file.getAbsolutePath());
 			FileInputStream fis = new FileInputStream(file);
 			sftpChannel.put(fis, file.getName());
 			fis.close();

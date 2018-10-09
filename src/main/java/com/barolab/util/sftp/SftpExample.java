@@ -69,16 +69,7 @@ public class SftpExample {
 		session.disconnect();
 	}
 
-	protected void showTime(String debug, long longTime) {
-		java.util.Date date = new Date(longTime);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		String strTime = simpleDateFormat.format(longTime);
-		System.out.println(debug + " : " + strTime);
 
-//	    ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.of("Asia/Seoul"));
-//        String dateCreated = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(t);
-//        System.out.println("Creation time:   "+dateCreated);
-	}
 
 
 	public void upload(String fileName, String remoteDir) {

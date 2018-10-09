@@ -19,9 +19,11 @@ public class ConcoleHandler extends Handler {
 
 	@Override
 	public void publish(LogRecord arg0) {
+		String sLevel = arg0.getLevel()+"           ";
+		sLevel = sLevel.substring(0, 7);
 		String name = arg0.getSourceClassName();
 		name = name.substring(name.lastIndexOf(".")+1, name.length());
-		System.out.println("["+name+"] "+arg0.getLevel()+":: "+arg0.getMessage());
+		System.out.println(sLevel+":"  +name+"."+arg0.getSourceMethodName()+"():"+":: "+arg0.getMessage());
 
 	}
 
