@@ -173,7 +173,7 @@ public class SftpSync {
 			} else {
 				if (fileSet.findByNameTime(localfile) == null) {
 					fi.put(localfile);
-					count ++;
+					count++;
 				} else {
 					log.fine("no move file = " + localfile.getName());
 				}
@@ -182,16 +182,16 @@ public class SftpSync {
 		/**
 		 * Sync Time
 		 */
+	
 		try {
 			SftpATTRS attr = sftpChannel.lstat(remotePath);
-			// attr.setACMODTIME((int) (localDir.lastModified() / 1000), (int)
-			// (localDir.lastModified() / 1000));
-			attr.setACMODTIME(attr.getATime(), (int) (localDir.lastModified() / 1000));
+			int timeModified = (int) (localDir.lastModified() / 1000);
+			attr.setACMODTIME(attr.getATime(), timeModified);
 			sftpChannel.setStat(remotePath, attr);
 		} catch (SftpException e) {
 			// TODO Auto-generated catch block
 			if (e.getMessage().indexOf("Failure") >= 0) {
-				log.warning("RemoteDir.timeset: " + remotePath + " 4: Failure Exception");
+				log.fine("RemoteDir.timeset: " + remotePath + " 4: Failure Exception");
 			} else {
 				e.printStackTrace();
 			}
@@ -203,8 +203,10 @@ public class SftpSync {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		log.info("LocalDir = " + localDir.getPath() + " #"+ count+"/"+ localDir.listFiles().length);
+
+		if (count > 0) {
+			log.info("LocalDir = " + localDir.getPath() + " #" + count + "/" + localDir.listFiles().length);
+		}
 
 	}
 

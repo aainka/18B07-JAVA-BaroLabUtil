@@ -29,10 +29,10 @@ public class SshTerm {
 		connect("root", "root123", "1.241.184.143", 22);
 		try {
 			sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
-			sendShell("ps -ef | grep java \n", "#");
+	//		sendShell("ps -ef | grep java \n", "#");
 
-//			sendShell("sh ../upload.sh\n", "':");
-//			sendShell("inka4723\n", "#");
+ 			sendShell("sh ../upload.sh\n", "':");
+ 			sendShell("inka4723\n", "#");
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}

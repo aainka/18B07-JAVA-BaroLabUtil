@@ -24,7 +24,6 @@ public class ConcoleHandler extends Handler {
 		String name = arg0.getSourceClassName();
 		name = name.substring(name.lastIndexOf(".")+1, name.length());
 		System.out.println(sLevel+":"  +name+"."+arg0.getSourceMethodName()+"():"+":: "+arg0.getMessage());
-
 	}
 
 }
