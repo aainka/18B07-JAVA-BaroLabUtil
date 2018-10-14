@@ -26,13 +26,20 @@ public class SshTerm {
 
 	public void test() {
 		configLog();
-		connect("root", "root123", "1.241.184.143", 22);
+	//	connect("root", "root123", "1.241.184.143", 22);
+		connect("root", "root123", "192.168.25.50", 22);
+		
 		try {
-			sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
+			Thread.sleep(1000);
+		 	waitPrompt("#");
+		 	System.out.println("########################");
+			sendShell("ls -al | more\n", "#");
+ 	//		sendShell("man ls\n", "#");
+	//		sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
 	//		sendShell("ps -ef | grep java \n", "#");
 
- 			sendShell("sh ../upload.sh\n", "':");
- 			sendShell("inka4723\n", "#");
+ 	//		sendShell("sh ../upload.sh\n", "':");
+ 	//		sendShell("inka4723\n", "#");
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -60,7 +67,7 @@ public class SshTerm {
 	}
 
 	public void waitPrompt(String marker) throws IOException, InterruptedException {
-		log.config("wait prompt");
+		log.config("wait prompt ===============");
 		String msg = new String();
 		while (true) {
 			while (input.available() > 0) {
@@ -88,7 +95,8 @@ public class SshTerm {
 			session.setPassword(passwd);
 			session.connect();
 			channel = session.openChannel("shell");
-			((ChannelShell) channel).setPtyType("vt102");
+			  ((ChannelShell) channel).setPtyType("dumb",80,3000,640,480);
+		//	((ChannelShell) channel).setPtyType("dumb", col, row, wp, hp);
 			channel.connect(5000);
 			output = channel.getOutputStream();
 			input = channel.getInputStream();
