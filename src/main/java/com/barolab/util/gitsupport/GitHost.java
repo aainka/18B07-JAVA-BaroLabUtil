@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import com.barolab.util.sftp.SshFtpSync;
-import com.barolab.util.sftp.SshTerm;
+import com.barolab.util.sftp.SshShell;
 
 public class GitHost {
 
-	SshTerm shell = new SshTerm();
+	SshShell shell = new SshShell();
 	SshFtpSync ftpSync = new SshFtpSync();
 
 	public void connect(String user, String passwd, String host, int port) {
@@ -20,7 +20,7 @@ public class GitHost {
 		shell.disconnect();
 		ftpSync.disconnect();
 	}
-//	git clone http://github.com/aainka/18B07-BaroLabUtil
+
 	public void pull(String project, String remotePath, String comment) {
 		try {
 			shell.doCommand("cd " + remotePath + "/" + project);

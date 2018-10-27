@@ -10,7 +10,7 @@ public class TermView {
 
 	JFrame frame = new JFrame("test");
 	JTextPane console = new JTextPane();
-	SshTerm termShell = new SshTerm();
+	SshShell termShell = new SshShell();
 
 	public void test() {
 		frame.setSize(500, 500);

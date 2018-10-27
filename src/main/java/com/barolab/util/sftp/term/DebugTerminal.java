@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
-import com.barolab.util.sftp.SshTerm;
+import com.barolab.util.sftp.SshShell;
 
 public class DebugTerminal {
 
@@ -16,7 +16,7 @@ public class DebugTerminal {
 
 	private static JTerminal terminal;
 
-	private SshTerm termShell = new SshTerm();
+	private SshShell termShell = new SshShell();
 	private PrintWriter writer;
 	private BufferedReader reader;
 

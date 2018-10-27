@@ -25,19 +25,12 @@ import com.jcraft.jsch.SftpException;
 
 import lombok.extern.java.Log;
 
-// 일단 싱크에만 집중하자.
-// 없는 화일을 검사해서 지워주어야 한다. (쉬운방법은 기존에 있던것을 모두 지우고 새로 넣는 것이다.)
-// 결과는 동일하다. 어느 것이 쉬운가?
-// 문제는 GIT 정보까지 없어지는 것이 문제이다.
-// 결론은 JGIT이다. 금방 다운받아서 쓰고 버리기. 
-// 그랫으면 기존에 사용하지
-
 @Log
-public class SshFtpSync {
+public class SshFtpSync extends SshDefault {
 
-	private JSch jsch = new JSch();
-	private Session session = null;
-	private Channel channel = null;
+
+//	private Session session = null;
+
 	private OutputStream output = null;
 	private InputStream input = null;
 	public ChannelSftp sftpChannel;
@@ -107,7 +100,7 @@ public class SshFtpSync {
 	public void connect(String user, String passwd, String host, int port) {
 		log.info("connecting..." + host);
 		try {
-			jsch = new JSch();
+		//	jsch = new JSch();
 			session = jsch.getSession(user, host, port);
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.setPassword(passwd);
@@ -182,7 +175,7 @@ public class SshFtpSync {
 		/**
 		 * Sync Time
 		 */
-	
+
 		try {
 			SftpATTRS attr = sftpChannel.lstat(remotePath);
 			int timeModified = (int) (localDir.lastModified() / 1000);
