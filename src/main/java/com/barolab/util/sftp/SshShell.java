@@ -49,7 +49,7 @@ public class SshShell extends SshDefault {
 		writer.write(command + "\n");
 		writer.flush();
 		String response = waitPrompt(prompt);
-		log.info(command + "OK\n" + response + "\n");
+		log.info(   response + "\n");
 	}
 
 	public String doCommand(String command, String tprompt) throws IOException, InterruptedException {
@@ -57,7 +57,7 @@ public class SshShell extends SshDefault {
 		writer.write(command + "\n");
 		writer.flush();
 		String response = waitPrompt(tprompt);
-		log.info(command + "OK\n" + response + "\n");
+		log.info(response + "\n");
 		return response;
 	}
 
