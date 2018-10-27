@@ -1,5 +1,7 @@
 package com.barolab.util.sftp.term;
 
+import java.awt.event.FocusListener;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,6 +12,9 @@ import javax.swing.UIManager;
 
 import com.barolab.util.sftp.SshShell;
 
+import lombok.extern.java.Log;
+
+@Log
 public class DebugTerminal {
 
 	// private static Process p;
@@ -21,6 +26,7 @@ public class DebugTerminal {
 	private BufferedReader reader;
 
 	public void test() {
+	terminal.setEditable(false);
 		termShell.connect("root", "root123", "211.239.124.246", 19801); // fun25
 		// termShell.connect("root", "root123", "110.13.71.93", 22); // raspberry
 		writer = termShell.getWriter();
@@ -41,10 +47,11 @@ public class DebugTerminal {
 						while (reader.ready()) {
 							char c = (char) reader.read();
 							rxMessage += c;
-							// System.out.println("rx.t = "+rxMessage);
 						}
 						if (rxMessage.length() > 0) {
+							terminal.setEditable(true);
 							terminal.append(rxMessage);
+							terminal.setEditable(false);
 							rxMessage = new String();
 						}
 						Thread.sleep(200);
@@ -102,7 +109,7 @@ public class DebugTerminal {
 
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.addKeyListener(terminal.getKeyListener());
+	//	frame.addKeyListener(terminal.getKeyListener());
 		frame.add(scrollPane);
 		frame.setSize(675, 700);
 		frame.setVisible(true);
@@ -131,6 +138,9 @@ public class DebugTerminal {
 	}
 
 	public void append(char c) {
+		terminal.setEditable(true);
+		terminal.append(""+c);
+		terminal.setEditable(false);
 		if (c == '\n') {
 			writer.print("\n");
 			writer.flush();
