@@ -29,6 +29,7 @@ public class SshTerm {
 	private byte buffer[] = new byte[8096];
 	private BufferedReader reader;
 	private PrintWriter writer;
+	private String prompt = new String("# ");
 
 	public void test() {
 		// SshHost("211.239.124.246", 19801)
@@ -60,14 +61,20 @@ public class SshTerm {
 		p.addHandler(new com.barolab.log.ConcoleHandler());
 		log0.setUseParentHandlers(false);
 	}
+	
+	public void doCommand(String command) throws IOException, InterruptedException {
+		log.info(command);
+		writer.write(command+"\n");
+		writer.flush();
+		String response = waitPrompt(prompt);
+		log.info(command + "OK\n"+response+"\n");
+	}
 
 	public String sendShell(String cmd, String prompt) throws IOException, InterruptedException {
 		log.info("### SEND : " + cmd);
 		long time = System.currentTimeMillis();
 		writer.write(cmd);
 		writer.flush();
-//		output.write(cmd.getBytes());
-//		output.flush();
 		String response = waitPrompt(prompt);
 		log.info("#### SEND : " + cmd + "time = " + (System.currentTimeMillis() - time));
 		return response;
@@ -78,10 +85,8 @@ public class SshTerm {
 		log.config("wait prompt");
 		String msg = new String();
 		while (true) {
-			System.out.println("xx");
 			while (reader.ready()) {
 			 	char c = (char) reader.read();
-				// String s = reader.readLine();
 				msg += c;
 			}
 			if (msg.indexOf(marker) > 0) {
@@ -95,7 +100,8 @@ public class SshTerm {
 	}
 
 	public void connect(String user, String passwd, String host, int port) {
-		System.out.println("connecting..." + host);
+		configLog();
+		log.info("connect "+host);
 		try {
 			jsch = new JSch();
 			session = jsch.getSession(user, host, port);
@@ -123,4 +129,6 @@ public class SshTerm {
 	static public void main0(String[] args) {
 		new SshTerm().test();
 	}
+
+
 }

@@ -6,7 +6,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.barolab.util.sftp.SftpSync;
+import com.barolab.util.sftp.SshFtpSync;
 
 // 최종목표 : syncGit( "project-a" )
 // 부가목표 : syncDir(상호데이타 싱크) : USB
@@ -19,7 +19,7 @@ public class TestFtp {
 	String password;
 	String localPath = "C:/tmp";
 	String remotePath = "/root/BBB";
-	SftpSync syncFTP = null;
+	SshFtpSync syncFTP = null;
 
 	@Test
 	public void testHost() {
@@ -48,7 +48,7 @@ public class TestFtp {
 
 	public void testClean(String remotePath) {
 		System.out.println("testClean #############################");
-		syncFTP = new SftpSync();
+		syncFTP = new SshFtpSync();
 		syncFTP.connect( user, password,host, port);
 		syncFTP.rmdir(remotePath);
 		syncFTP.disconnect();
@@ -57,7 +57,7 @@ public class TestFtp {
 	public void testSync(String localPath, String remotePath) {
 		System.out.println("testSync #############################");
 		File localDir = new File(localPath);
-		syncFTP = new SftpSync( );
+		syncFTP = new SshFtpSync( );
 		syncFTP.connect( user, password,host, port);
 		syncFTP.syncUpload(localDir, remotePath);
 		syncFTP.disconnect();
