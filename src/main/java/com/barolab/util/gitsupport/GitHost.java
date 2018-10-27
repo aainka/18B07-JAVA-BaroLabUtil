@@ -29,8 +29,10 @@ public class GitHost {
 			File localDir = new File("C:/@SWDevelopment/workspace-java/" + project);
 			ftpSync.syncUpload(localDir, remotePath + "/" + project);
 			shell.doCommand("git add -A");
-		 	shell.doCommand("git commit -m " + "\"" + comment + "\"");
-			// shell.doCommand("git push");
+			shell.doCommand("git commit -m " + "\"" + comment + "\"", "':");
+			  shell.doCommand("git push");
+			  shell.doCommand("aainka", "':");
+				shell.doCommand("inka4723");
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

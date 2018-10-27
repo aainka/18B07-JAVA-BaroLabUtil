@@ -69,6 +69,13 @@ public class SshTerm {
 		String response = waitPrompt(prompt);
 		log.info(command + "OK\n"+response+"\n");
 	}
+	public void doCommand(String command, String tprompt) throws IOException, InterruptedException {
+		log.info(command);
+		writer.write(command+"\n");
+		writer.flush();
+		String response = waitPrompt(tprompt);
+		log.info(command + "OK\n"+response+"\n");
+	}
 
 	public String sendShell(String cmd, String prompt) throws IOException, InterruptedException {
 		log.info("### SEND : " + cmd);
