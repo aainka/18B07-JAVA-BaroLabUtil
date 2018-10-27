@@ -20,7 +20,7 @@ public class GitHost {
 		shell.disconnect();
 		ftpSync.disconnect();
 	}
-
+//	git clone http://github.com/aainka/18B07-BaroLabUtil
 	public void pull(String project, String remotePath, String comment) {
 		try {
 			shell.doCommand("cd " + remotePath + "/" + project);
