@@ -45,18 +45,7 @@ public class SshFtpSync extends SshDefault {
 		disconnect();
 	}
 
-	public void configLog() {
-		System.out.println("logConfig");
-		Logger log0 = Logger.getLogger("Platfrom.DashConsole.*");
-		Logger p = log0.getParent();
-		for (Handler h : p.getHandlers()) {
-			p.removeHandler(h);
-		}
-		p.addHandler(new com.barolab.log.ConcoleHandler());
-		log0.setUseParentHandlers(false);
-		log0 = Logger.getLogger("com.barolab.*");
-		log0.setLevel(Level.INFO);
-	}
+
 
 	public void testSync(String localPath, String remotePath) {
 		File localDir = new File(localPath);

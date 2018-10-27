@@ -19,19 +19,19 @@ public class TermView {
 
 		termShell.connect("root", "root123", "211.239.124.246", 19801);
 		try {
-//			sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
-			String response = termShell.sendShell("uptime \n", "#");
+//			doCommand("cd AAA/18B07-BaroLabUtil\n", "#");
+			String response = termShell.doCommand("uptime \n", "#");
 
 			console.setText(response);
-			response += termShell.sendShell("ps -ef \n", "#");
+			response += termShell.doCommand("ps -ef \n", "#");
 			console.setText(response);
-			response += termShell.sendShell("date \n", "#");
+			response += termShell.doCommand("date \n", "#");
 			console.setText(response);
-//			sendShell("ps -ef \n", "#");
-// 	 		sendShell("ps -ef | grep java \n", "#");
+//			doCommand("ps -ef \n", "#");
+// 	 		doCommand("ps -ef | grep java \n", "#");
 //
-// 			sendShell("sh ../upload.sh\n", "':");
-// 			sendShell("inka4723\n", "#");
+// 			doCommand("sh ../upload.sh\n", "':");
+// 			doCommand("inka4723\n", "#");
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
