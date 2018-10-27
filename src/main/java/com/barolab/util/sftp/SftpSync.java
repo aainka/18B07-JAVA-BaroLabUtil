@@ -37,10 +37,9 @@ public class SftpSync {
 
 	private JSch jsch = new JSch();
 	private Session session = null;
-	
-//	private OutputStream output = null;
-//	private InputStream input = null;
 	private Channel channel = null;
+	private OutputStream output = null;
+	private InputStream input = null;
 	public ChannelSftp sftpChannel;
 
 	public void testHost() {

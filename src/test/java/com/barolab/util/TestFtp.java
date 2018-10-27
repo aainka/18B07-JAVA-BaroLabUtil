@@ -28,28 +28,28 @@ public class TestFtp {
 		logger.setLevel(Level.INFO);
 
 		host = "192.168.25.50";
-		host = "1.241.184.143";
-		port = 22;
+		host = "211.239.124.246"; // , 19801
+		port = 19801;
 		user = "root";
 		password = "root123";
 		
 		String project_id = "18B07-BaroLabUtil";
 		String localPath = "C:/@SWDevelopment/workspace-java/" + project_id;
-		String remotePath = "/root/AAA/" + project_id;
+		String remotePath = "/proj7/GITHUB/" + project_id;
 		testSync(localPath, remotePath);
 
 		project_id = "18004-DashConsole";
 		localPath = "C:/@SWDevelopment/workspace-java/" + project_id;
-		remotePath = "/root/AAA/" + project_id;
-		testSync(localPath, remotePath);
+		remotePath = "/proj7/GITHUB/" + project_id;
+		// testSync(localPath, remotePath);
 
 		// testClean(remotePath);
 	}
 
 	public void testClean(String remotePath) {
 		System.out.println("testClean #############################");
-		syncFTP = new SftpSync(host, port, user, password);
-		syncFTP.connect();
+		syncFTP = new SftpSync();
+		syncFTP.connect( user, password,host, port);
 		syncFTP.rmdir(remotePath);
 		syncFTP.disconnect();
 	}
@@ -57,8 +57,8 @@ public class TestFtp {
 	public void testSync(String localPath, String remotePath) {
 		System.out.println("testSync #############################");
 		File localDir = new File(localPath);
-		syncFTP = new SftpSync(host, port, user, password);
-		syncFTP.connect();
+		syncFTP = new SftpSync( );
+		syncFTP.connect( user, password,host, port);
 		syncFTP.syncUpload(localDir, remotePath);
 		syncFTP.disconnect();
 	}

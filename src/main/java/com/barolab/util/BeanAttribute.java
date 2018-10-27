@@ -14,6 +14,7 @@ public class BeanAttribute {
 	private Class Type;
 	private Method getter, setter;
 	private Class clazz;
+	private int xlsColIndex;
 
 	public BeanAttribute init(Field f, int index) {
 		this.index = index;

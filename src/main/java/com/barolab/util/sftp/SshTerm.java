@@ -1,8 +1,10 @@
 package com.barolab.util.sftp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.CharBuffer;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -12,34 +14,36 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+import lombok.Data;
 import lombok.extern.java.Log;
 
+@Data
 @Log
 public class SshTerm {
 
 	private Session session = null;
 	private Channel channel = null;
-	private OutputStream output = null;
-	private InputStream input = null;
+//	private OutputStream output = null;
+//	private InputStream input = null;
 	private JSch jsch = new JSch();
 	private byte buffer[] = new byte[8096];
+	private BufferedReader reader;
+	private PrintWriter writer;
 
 	public void test() {
+		// SshHost("211.239.124.246", 19801)
 		configLog();
-	//	connect("root", "root123", "1.241.184.143", 22);
-		connect("root", "root123", "192.168.25.50", 22);
-		
+		// connect("root", "root123", "1.241.184.143", 22);
+		connect("root", "root123", "110.13.71.93", 22); // Raspiberry
+		connect("root", "root123", "211.239.124.246", 19801);
 		try {
-			Thread.sleep(1000);
-		 	waitPrompt("#");
-		 	System.out.println("########################");
-			sendShell("ls -al | more\n", "#");
- 	//		sendShell("man ls\n", "#");
-	//		sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
-	//		sendShell("ps -ef | grep java \n", "#");
-
- 	//		sendShell("sh ../upload.sh\n", "':");
- 	//		sendShell("inka4723\n", "#");
+//			sendShell("cd AAA/18B07-BaroLabUtil\n", "#");
+			sendShell("uptime \n", "#");
+			sendShell("ps -ef \n", "#");
+			sendShell("ps -ef | grep java \n", "#");
+//
+// 			sendShell("sh ../upload.sh\n", "':");
+// 			sendShell("inka4723\n", "#");
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -57,33 +61,37 @@ public class SshTerm {
 		log0.setUseParentHandlers(false);
 	}
 
-	public void sendShell(String cmd, String prompt) throws IOException, InterruptedException {
+	public String sendShell(String cmd, String prompt) throws IOException, InterruptedException {
 		log.info("### SEND : " + cmd);
 		long time = System.currentTimeMillis();
-		output.write(cmd.getBytes());
-		output.flush();
-		waitPrompt(prompt);
+		writer.write(cmd);
+		writer.flush();
+//		output.write(cmd.getBytes());
+//		output.flush();
+		String response = waitPrompt(prompt);
 		log.info("#### SEND : " + cmd + "time = " + (System.currentTimeMillis() - time));
+		return response;
 	}
 
-	public void waitPrompt(String marker) throws IOException, InterruptedException {
-		log.config("wait prompt ===============");
+
+	public String waitPrompt(String marker) throws IOException, InterruptedException {
+		log.config("wait prompt");
 		String msg = new String();
 		while (true) {
-			while (input.available() > 0) {
-				int size = input.read(buffer);
-				// System.out.println("rx.size=" + size);
-				String response = new String(buffer, 0, size);
-				System.out.print(response);
-				msg += response;
+			System.out.println("xx");
+			while (reader.ready()) {
+			 	char c = (char) reader.read();
+				// String s = reader.readLine();
+				msg += c;
 			}
 			if (msg.indexOf(marker) > 0) {
 				break;
 			}
 			Thread.sleep(200);
 		}
-		log.config("m=" + msg);
+		log.info("m=" + msg);
 		log.config("wait prompt ok ==============================");
+		return msg;
 	}
 
 	public void connect(String user, String passwd, String host, int port) {
@@ -95,11 +103,12 @@ public class SshTerm {
 			session.setPassword(passwd);
 			session.connect();
 			channel = session.openChannel("shell");
-			  ((ChannelShell) channel).setPtyType("dumb",80,3000,640,480);
-		//	((ChannelShell) channel).setPtyType("dumb", col, row, wp, hp);
+			((ChannelShell) channel).setPtyType("vt102");
 			channel.connect(5000);
-			output = channel.getOutputStream();
-			input = channel.getInputStream();
+			// output = channel.getOutputStream();
+			// input = channel.getInputStream();
+			reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+			writer = new PrintWriter(channel.getOutputStream(), true);
 		} catch (JSchException | IOException e) {
 			e.printStackTrace();
 		}
@@ -111,7 +120,7 @@ public class SshTerm {
 		session.disconnect();
 	}
 
-	static public void main(String[] args) {
+	static public void main0(String[] args) {
 		new SshTerm().test();
 	}
 }
