@@ -31,8 +31,8 @@ public class SshFtpSync extends SshDefault {
 
 //	private Session session = null;
 
-	private OutputStream output = null;
-	private InputStream input = null;
+//	private OutputStream output = null;
+//	private InputStream input = null;
 	public ChannelSftp sftpChannel;
 
 	public void testHost() {
@@ -43,12 +43,6 @@ public class SshFtpSync extends SshDefault {
 		String remotePath = "/root/AAA/" + project_id;
 		testSync(localPath, remotePath);
 		disconnect();
-
-//		project_id = "18004-DashConsole";
-//		localPath = "C:/@SWDevelopment/workspace-java/" + project_id;
-//		remotePath = "/root/AAA/" + project_id;
-//		testSync(localPath, remotePath);
-
 	}
 
 	public void configLog() {
@@ -100,7 +94,6 @@ public class SshFtpSync extends SshDefault {
 	public void connect(String user, String passwd, String host, int port) {
 		log.info("connecting..." + host);
 		try {
-		//	jsch = new JSch();
 			session = jsch.getSession(user, host, port);
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.setPassword(passwd);

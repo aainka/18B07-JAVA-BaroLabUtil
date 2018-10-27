@@ -20,20 +20,14 @@ import lombok.extern.java.Log;
 @Data
 @Log
 public class SshShell extends SshDefault {
-
 	
- 
-//	private InputStream input = null;
- 
-	private byte buffer[] = new byte[8096];
+//	private byte buffer[] = new byte[8096];
 	private BufferedReader reader;
 	private PrintWriter writer;
 	private String prompt = new String("# ");
 
 	public void test() {
-		// SshHost("211.239.124.246", 19801)
 		configLog();
-		// connect("root", "root123", "1.241.184.143", 22);
 		connect("root", "root123", "110.13.71.93", 22); // Raspiberry
 		connect("root", "root123", "211.239.124.246", 19801);
 		try {
@@ -41,9 +35,6 @@ public class SshShell extends SshDefault {
 			sendShell("uptime \n", "#");
 			sendShell("ps -ef \n", "#");
 			sendShell("ps -ef | grep java \n", "#");
-//
-// 			sendShell("sh ../upload.sh\n", "':");
-// 			sendShell("inka4723\n", "#");
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -109,16 +100,14 @@ public class SshShell extends SshDefault {
 		configLog();
 		log.info("connect "+host);
 		try {
-		//	jsch = new JSch();
 			session = jsch.getSession(user, host, port);
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.setPassword(passwd);
 			session.connect();
+			
 			channel = session.openChannel("shell");
 			((ChannelShell) channel).setPtyType("vt102");
 			channel.connect(5000);
-			// output = channel.getOutputStream();
-			// input = channel.getInputStream();
 			reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
 			writer = new PrintWriter(channel.getOutputStream(), true);
 		} catch (JSchException | IOException e) {
