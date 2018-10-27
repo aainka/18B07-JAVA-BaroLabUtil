@@ -62,7 +62,6 @@ public class SshShell extends SshDefault {
 	}
 
 	public String waitPrompt(String marker) throws IOException, InterruptedException {
-		log.config("wait prompt");
 		String msg = new String();
 		while (true) {
 			while (reader.ready()) {
@@ -74,7 +73,7 @@ public class SshShell extends SshDefault {
 			}
 			Thread.sleep(200);
 		}
-		log.info("m=" + msg);
+	 	log.config("m=" + msg);
 		log.config("wait prompt ok ==============================");
 		return msg;
 	}
