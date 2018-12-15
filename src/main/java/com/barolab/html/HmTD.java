@@ -1,9 +1,6 @@
-package com.barolab;
+package com.barolab.html;
 
 import java.util.Date;
-import java.util.List;
-
-import Platform.DashConsole.OV_Issue;
 
 public class HmTD extends HmObject {
 
@@ -12,13 +9,13 @@ public class HmTD extends HmObject {
 
 	public void toHTML(HttpPrintStream h) {
 		String stag = new String("<td");
-		if ( width > 0 ) {
-			stag += " width="+width;
+		if (width > 0) {
+			stag += " width=" + width;
 		}
-		if ( align != null ) {
-			stag += " align=\""+align+"\"";
+		if (align != null) {
+			stag += " align=\"" + align + "\"";
 		}
-		h.println(stag+" >");
+		h.println(stag + " >");
 		for (Object anObject : comp) {
 			h.println(anObject);
 		}
@@ -29,19 +26,20 @@ public class HmTD extends HmObject {
 	public void add(int value) {
 		comp.add("" + value);
 	}
-	
+
 	public void add(float value) {
 		comp.add("" + value);
-		
+
 	}
 
 	public void add(String sValue) {
 		comp.add(sValue);
 
 	}
+
 	public void add(Date spentOn) {
 		comp.add(spentOn.toLocaleString());
-		
+
 	}
 
 	public HmTD setWidth(int width) {
@@ -53,9 +51,5 @@ public class HmTD extends HmObject {
 		this.align = align;
 		return this;
 	}
-
-
-
-
 
 }

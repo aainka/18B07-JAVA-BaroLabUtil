@@ -1,4 +1,4 @@
-package com.barolab;
+package com.barolab.html;
 
 import java.io.File;
 import java.io.FileNotFoundException;

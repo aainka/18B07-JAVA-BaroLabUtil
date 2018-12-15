@@ -1,4 +1,4 @@
-package com.barolab;
+package com.barolab.html;
 
 import java.util.LinkedList;
 import java.util.List;

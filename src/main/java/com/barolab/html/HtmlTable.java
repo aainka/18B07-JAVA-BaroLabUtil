@@ -1,4 +1,4 @@
-package com.barolab;
+package com.barolab.html;
 
 public class HtmlTable  {
 
