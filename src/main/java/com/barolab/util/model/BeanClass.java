@@ -5,9 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.barolab.util.ExcelObjectReader;
+import com.barolab.util.TableMap;
 
 import lombok.Data;
 import lombok.extern.java.Log;
@@ -89,7 +90,7 @@ public class BeanClass<T> {
 			for (int clevel = 0; clevel < atr.length; clevel++) {
 				String atrName = atr[clevel];
 
-				BeanAttribute bAtr = findAttribute(atr[clevel]); 
+				BeanAttribute bAtr = findAttribute(atr[clevel]);
 				// System.out.println("atr.compare = "+atrName+", bean = "+bAtr);
 				if (bAtr == null) {
 					log.severe("Can't found attribute = " + atr[clevel]);
@@ -115,12 +116,12 @@ public class BeanClass<T> {
 
 	private transient XSSFWorkbook workbook = new XSSFWorkbook();
 	private transient Sheet sheet;
- 	private CellStyle cellStyleDate;
+	private CellStyle cellStyleDate;
 	private transient CellStyle cellStyleHref;
 	private transient CellStyle cellStyleHeader;
 
 	public int writeExcel(String filename, String sheetname, List<T> list) {
-		
+
 		cellStyleDate = workbook.createCellStyle();
 		CreationHelper createHelper = workbook.getCreationHelper();
 		short dateFormat = createHelper.createDataFormat().getFormat("yyyy-MM-dd");
@@ -176,19 +177,19 @@ public class BeanClass<T> {
 					if (value == null)
 						continue;
 					if (value.getClass() == float.class || value.getClass() == Float.class) {
-						attr.getBeanType().writeExcelCell(attr,recObject,cell);
-					//	cell.setCellValue((Float) value);
+						attr.getBeanType().writeExcelCell(attr, recObject, cell);
+						// cell.setCellValue((Float) value);
 					}
 					if (value.getClass() == int.class || value.getClass() == Integer.class) {
 						cell.setCellValue((Integer) value);
 					}
 					if (value.getClass() == String.class) {
-						attr.getBeanType().writeExcelCell(attr,recObject,cell);
-					//	cell.setCellValue((String) value);
+						attr.getBeanType().writeExcelCell(attr, recObject, cell);
+						// cell.setCellValue((String) value);
 					}
 					if (value.getClass() == java.util.Date.class) {
 						cell.setCellStyle(cellStyleDate);
-						attr.getBeanType().writeExcelCell(attr,recObject,cell);
+						attr.getBeanType().writeExcelCell(attr, recObject, cell);
 //						java.util.Date vDate = (Date) value;
 //						if (vDate != null) {
 //							cell.setCellValue(vDate);
@@ -203,20 +204,73 @@ public class BeanClass<T> {
 
 		}
 
+		log.info("write body ok");
+
 		// colIndex = 0;
 		for (BeanAttribute attr : attrs) { // attribute name
 			sheet.autoSizeColumn(attr.getIndex());
 		}
-
+		log.info("write body ok2");
 		try {
 			FileOutputStream out = new FileOutputStream(new File(filename));
 			workbook.write(out);
 			out.close();
+			log.info("write body ok3");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return 0;
+	}
+
+	public TableMap<T> toTableMap(List<T> list, String rowKey, String colKey) {
+		log.info("toTableMap row=" + rowKey + " col=" + colKey);
+		TableMap<T> tbl = new TableMap<T>();
+		BeanAttribute rAtr = findAttribute(rowKey);
+		BeanAttribute cAtr = findAttribute(colKey);
+
+		for (T element : list) {
+			Object rKey = rAtr.getValue(element);
+			Object cKey = cAtr.getValue(element);
+			tbl.put("" + rKey, "" + cKey, element);
+		}
+		System.out.println(tbl.getRowKeys());
+		System.out.println(tbl.getColumnKeys());
+		return tbl;
+
+	}
+
+	public boolean match(String key, String... args) {
+		for (String arg : args) {
+			if (key.equals(arg)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean contains(String key, String... args) {
+		for (String arg : args) {
+			if (key.indexOf(arg) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void removeElement(List<T> list, String atrName, String... args) {
+		List<T> tmp = new ArrayList<T>();
+		BeanAttribute atr = findAttribute(atrName);
+		for (T element : list) {
+			Object value = atr.getValue(element);
+			if (value != null) {
+				if (contains((String) value, args)) {
+					tmp.add(element);
+				}
+			}
+		}
+		list.removeAll(tmp);
+
 	}
 
 }

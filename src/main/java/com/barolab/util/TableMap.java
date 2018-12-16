@@ -1,9 +1,13 @@
 package com.barolab.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+ 
 
 public class TableMap<T> {
 
@@ -39,6 +43,7 @@ public class TableMap<T> {
 				return valueList;
 			}
 		}
+	
 		return null;
 	}
 
@@ -48,15 +53,28 @@ public class TableMap<T> {
 		for (int i = 0; i < array.length; i++) {
 			a.add((String) array[i]);
 		}
+		Collections.sort(a, new Ascending());
 		return a;
 	}
 
 	public List<String> getColumnKeys() {
+		Collections.sort(columnList, new Ascending());
 		return columnList;
 	}
 
+ 
+
 	public void build(String string, String string2) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	private class Ascending implements Comparator<String> {
+
+		@Override
+		public int compare(String arg0, String arg1) {
+			return arg0.compareTo(arg1);
+		}
 
 	}
 

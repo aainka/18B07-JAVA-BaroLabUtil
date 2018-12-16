@@ -13,7 +13,13 @@ public class HttpPrintStream extends PrintStream {
 		printMeta();
 	}
 	
+	public void close() {
+		println("</html>");
+	
+	}
+	
 	private void printMeta() {
+		println("<html>");
 		println("<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>");
 		println("<style>");
 		println(".mytable { border-collapse:collapse; }   ");
@@ -37,10 +43,6 @@ public class HttpPrintStream extends PrintStream {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public static void main(String arg[]) {
-
 	}
 
 }

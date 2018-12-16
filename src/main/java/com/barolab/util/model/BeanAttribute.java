@@ -1,6 +1,7 @@
 package com.barolab.util.model;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import lombok.Data;
@@ -35,5 +36,25 @@ public class BeanAttribute {
 			return null;
 		}
 		return this;
+	}
+	
+	public Object getValue(Object recObject) {
+		Object value = null;
+		try {
+			value = getter.invoke(recObject);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return value;
+	}
+	
+	public void setValue(Object recObject, Object value) {
+		  try {
+			setter.invoke(recObject, value);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
