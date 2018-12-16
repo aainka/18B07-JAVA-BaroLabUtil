@@ -18,20 +18,24 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import com.barolab.util.model.BeanAttribute;
+import com.barolab.util.model.BeanClass;
+
 import lombok.extern.java.Log;
 
 @Log
-public class ExcelObjectReader extends ExcelObjectDefault {
+public class ExcelObjectReader <T> extends ExcelObjectDefault {
 
 	private Field[] vfields = new Field[100];
 	private DataFormatter dataFormatter = new DataFormatter();
-	private BeanClass beanClass = new BeanClass();
+ 	private BeanClass beanClass = null;
 	private List<BeanAttribute> colAttrs = new LinkedList<BeanAttribute>();
 
-	public List<?> read(Class clazz, String sheetname, String filename) {
-		beanClass.init(clazz);
+	public List<T> read(BeanClass beanClass, String sheetname, String filename) {
+		//beanClass.init(clazz);
+		this.beanClass = beanClass;
 		try {
-			return read0(clazz, sheetname, filename);
+			return read0(  sheetname, filename);
 		} catch (EncryptedDocumentException | InvalidFormatException | InstantiationException | IllegalAccessException
 				| IOException e) {
 			// TODO Auto-generated catch block
@@ -40,10 +44,10 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 		return null;
 	}
 
-	public List<?> read0(Class clazz, String sheetname, String filename) throws EncryptedDocumentException,
+	public List<T> read0(  String sheetname, String filename) throws EncryptedDocumentException,
 			InvalidFormatException, IOException, InstantiationException, IllegalAccessException {
 
-		// this.clazz = clazz;
+		 
 		Sheet sheet = null;
 		FileInputStream fileInputStream = new FileInputStream(filename);
 		Workbook workbook = WorkbookFactory.create(fileInputStream);
@@ -59,7 +63,6 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 		/**
 		 * make attribute list
 		 */
-		log.info("make attribute list from row0");
 		Row row0 = sheet.getRow(0);
 		for (Cell cell : row0) {
 			String name = cell.getStringCellValue();
@@ -70,7 +73,7 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 				log.info("col name = " + name + " attr=" + attr);
 			}
 		}
-		log.info("total attribute size = " + colAttrs.size());
+		log.info("Read "+beanClass.getName()+ ".attribute# = " + colAttrs.size());
 
 		/**
 		 * make value Object list
@@ -79,7 +82,7 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 		for (Row row : sheet) { // Each Row
 			if (row.getRowNum() == 0)
 				continue;
-			Object valueObject = clazz.newInstance();
+			Object valueObject = beanClass.getClazz().newInstance();
 			for (BeanAttribute attr : colAttrs) { // Each Activated Attribute
 				Cell cell = row.getCell(attr.getXlsColIndex());
 				if (cell == null) {
@@ -92,6 +95,10 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 						case 0: // numeric and date
 							if (attr.getType() == int.class) {
 								int v0 = (int) cell.getNumericCellValue();
+								attr.getSetter().invoke(valueObject, v0);
+							}
+							if (attr.getType() == float.class) {
+								float v0 = (float) cell.getNumericCellValue();
 								attr.getSetter().invoke(valueObject, v0);
 							}
 							if (attr.getType() == Date.class) {
@@ -121,7 +128,7 @@ public class ExcelObjectReader extends ExcelObjectDefault {
 			}
 			list.add(valueObject);
 		}
-		log.info("read class(" + beanClass.getClazz().getSimpleName() + ") count=" + list.size() + ".");
+		log.info("Read class(" + beanClass.getClazz().getSimpleName() + ") count=" + list.size() + ".");
 		return list;
 	}
 }

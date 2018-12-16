@@ -19,6 +19,9 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.barolab.util.model.BeanAttribute;
+import com.barolab.util.model.BeanClass;
+
 public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 
 	public abstract int format(Cell cell, BeanAttribute attr, Object value);

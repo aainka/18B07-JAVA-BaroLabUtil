@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import org.apache.poi.ss.usermodel.Cell;
 import org.junit.Test;
 
+import com.barolab.util.model.BeanAttribute;
+
 public class TestStart {
 	private OV_Item item;
 
