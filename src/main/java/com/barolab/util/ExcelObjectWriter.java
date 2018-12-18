@@ -19,6 +19,9 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.barolab.util.model.BeanAttribute;
+import com.barolab.util.model.BeanClass;
+
 public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 
 	public abstract int format(Cell cell, BeanAttribute attr, Object value);
@@ -31,7 +34,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 	private transient CellStyle cellStyleHeader;
 	private transient XSSFWorkbook workbook = new XSSFWorkbook();
 	private transient Sheet sheet;
-	BeanClass beanClass = new BeanClass();
+//	BeanClass beanClass = new BeanClass();
 
 	private void init_w() {
 		{
@@ -74,11 +77,11 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		this.filename = filename;
 		this.count = list.size();
 		beanClass.init(elementClass);
-		
-		if ( list.size() > 0 ) {
+
+		if (list.size() > 0) {
 			Class a = list.get(0).getClass();
-			if ( !a.equals(elementClass)) {
-				System.out.println("ERROR element.class = "+a.getName());
+			if (!a.equals(elementClass)) {
+				System.out.println("ERROR element.class = " + a.getName());
 				return;
 			}
 		}
