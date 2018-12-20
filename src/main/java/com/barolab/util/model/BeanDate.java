@@ -16,7 +16,7 @@ public class BeanDate extends BeanType {
 		return null;
 	}
 
-	public int compare(BeanAttribute atr, Object target0, Object target1) {
+	public int compareTargetAtr(BeanAttribute atr, Object target0, Object target1) {
 		java.util.Date s0 = getValue(atr, target0);
 		java.util.Date s1 = getValue(atr, target1);
 		return s0.compareTo(s1);

@@ -18,8 +18,10 @@ public class BeanAttribute {
 	private Class clazz;
 	private int xlsColIndex;
 	private BeanType beanType;
+	public BeanClass beanClass;
 
-	public BeanAttribute init(Field f, int index) {
+	public BeanAttribute init(BeanClass beanClass, Field f, int index) {
+		this.beanClass = beanClass;
 		this.index = index;
 		name = f.getName();
 		type = f.getType();
@@ -36,6 +38,10 @@ public class BeanAttribute {
 			return null;
 		}
 		return this;
+	}
+	
+	public String toString() {
+		return "bAtr["+name+", type="+beanType.getClass()+"] ";
 	}
 	
 	public Object getValue(Object recObject) {

@@ -17,7 +17,7 @@ public class BeanFloat extends BeanType {
 		return (float) 0;
 	}
 
-	public int compare(BeanAttribute atr, Object target0, Object target1) {
+	public int compareTargetAtr(BeanAttribute atr, Object target0, Object target1) {
 		Float s0 = getValue(atr, target0);
 		Float s1 = getValue(atr, target1);
 		return s0.compareTo(s1);

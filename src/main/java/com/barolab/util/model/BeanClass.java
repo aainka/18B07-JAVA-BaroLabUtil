@@ -8,9 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -28,24 +31,30 @@ import lombok.extern.java.Log;
 
 @Log
 @Data
-public class BeanClass<T> {
+public class BeanClass {
 
-	LinkedList<BeanAttribute> attrs = new LinkedList<BeanAttribute>();
+	static Map<String, BeanClass> map = new HashMap<String, BeanClass>();
+	private LinkedList<BeanAttribute> attrs = new LinkedList<BeanAttribute>();
 	private Class clazz;
 	private String name;
 
-	public BeanClass(Class clazz) {
-		init(clazz);
+	public static BeanClass getInstance(Class clazz) {
+		BeanClass bClass = map.get(clazz.getName());
+		if (bClass == null) {
+			bClass = new BeanClass(clazz);
+			map.put(clazz.getName(), bClass);
+		}
+		return bClass;
 	}
 
-	public void init(Class clazz) {
+	private BeanClass(Class clazz) {
 		this.clazz = clazz;
 		name = clazz.getSimpleName();
 		int count = 0;
 		for (Field f : clazz.getDeclaredFields()) { // attribute name
 			BeanAttribute attr = new BeanAttribute();
 			attr.setClazz(clazz);
-			if (attr.init(f, count) != null) {
+			if (attr.init(this, f, count) != null) {
 				attrs.add(attr);
 				// System.out.println( "init.attr = " + f.getName()+ " "+count);
 				count++;
@@ -56,13 +65,27 @@ public class BeanClass<T> {
 		}
 	}
 
-	public BeanAttribute findAttribute(String name) {
+	public BeanAttribute getAttribute(String name) {
 		for (BeanAttribute attr : attrs) {
 			if (attr.getName().equals(name)) {
-				log.finer("Found attribute name " + name);
 				return attr;
 			}
 		}
+		log.info("Wrong Attribute Name = " + name);
+		return null;
+	}
+
+	
+	public Object matchAtrValue(List<?> list, String atrName, Object value) {
+		BeanAttribute bAtr = getAttribute(atrName);
+		
+		for ( Object element : list) {
+			Object atrValue = bAtr.getValue(element);
+			if ( bAtr.getBeanType().compareValue(bAtr, atrValue, value) == 0 ) {
+				return element;
+			}
+		}
+		
 		return null;
 	}
 
@@ -70,13 +93,13 @@ public class BeanClass<T> {
 	// ** SORT UTIL
 	// ****************************************************************************
 
-	public void sort(List<T> list, String... atr) {
+	public void sort(List<?> list, String... atr) {
 		AtrComparator comparator = new AtrComparator();
 		comparator.setAtr(atr);
-		Collections.sort(list, comparator);
+		Collections.sort( list, comparator);
 	}
 
-	private class AtrComparator implements Comparator<T> {
+	private class AtrComparator implements Comparator<Object> {
 
 		String[] atr = null;
 
@@ -85,25 +108,41 @@ public class BeanClass<T> {
 		}
 
 		@Override
-		public int compare(T arg0, T arg1) {
+		public int compare(Object arg0, Object arg1) {
 			int result = 0;
 			for (int clevel = 0; clevel < atr.length; clevel++) {
 				String atrName = atr[clevel];
 
-				BeanAttribute bAtr = findAttribute(atr[clevel]);
+				BeanAttribute bAtr = getAttribute(atr[clevel]);
 				// System.out.println("atr.compare = "+atrName+", bean = "+bAtr);
 				if (bAtr == null) {
 					log.severe("Can't found attribute = " + atr[clevel]);
 					return 0;
 				} else {
 					// BeanType beanType = TypeFactory.find(bAtr.getType().getName());
-					result = bAtr.getBeanType().compare(bAtr, arg0, arg1);
+					result = bAtr.getBeanType().compareTargetAtr(bAtr, arg0, arg1);
 				}
 				if (result != 0)
 					break;
 			}
 			return result;
 		}
+	}
+
+	public TableMap toTableMap(List<?> list, String rowKey, String colKey) {
+		log.info("toTableMap row=" + rowKey + " col=" + colKey);
+		TableMap tbl = new TableMap();
+		BeanAttribute rAtr = getAttribute(rowKey);
+		BeanAttribute cAtr = getAttribute(colKey);
+
+		for (Object element : list) {
+			Object rKey = rAtr.getValue(element);
+			Object cKey = cAtr.getValue(element);
+			tbl.put("" + rKey, "" + cKey, element);
+		}
+		System.out.println(tbl.getRowKeys());
+		System.out.println(tbl.getColumnKeys());
+		return tbl;
 	}
 
 	// *****************************************************************************
@@ -120,7 +159,7 @@ public class BeanClass<T> {
 	private transient CellStyle cellStyleHref;
 	private transient CellStyle cellStyleHeader;
 
-	public int writeExcel(String filename, String sheetname, List<T> list) {
+	public int writeExcel(String filename, String sheetname, List<?> list) {
 
 		cellStyleDate = workbook.createCellStyle();
 		CreationHelper createHelper = workbook.getCreationHelper();
@@ -223,23 +262,6 @@ public class BeanClass<T> {
 		return 0;
 	}
 
-	public TableMap<T> toTableMap(List<T> list, String rowKey, String colKey) {
-		log.info("toTableMap row=" + rowKey + " col=" + colKey);
-		TableMap<T> tbl = new TableMap<T>();
-		BeanAttribute rAtr = findAttribute(rowKey);
-		BeanAttribute cAtr = findAttribute(colKey);
-
-		for (T element : list) {
-			Object rKey = rAtr.getValue(element);
-			Object cKey = cAtr.getValue(element);
-			tbl.put("" + rKey, "" + cKey, element);
-		}
-		System.out.println(tbl.getRowKeys());
-		System.out.println(tbl.getColumnKeys());
-		return tbl;
-
-	}
-
 	public boolean match(String key, String... args) {
 		for (String arg : args) {
 			if (key.equals(arg)) {
@@ -258,10 +280,10 @@ public class BeanClass<T> {
 		return false;
 	}
 
-	public void removeElement(List<T> list, String atrName, String... args) {
-		List<T> tmp = new ArrayList<T>();
-		BeanAttribute atr = findAttribute(atrName);
-		for (T element : list) {
+	public void removeElement(List<?> list, String atrName, String... args) {
+		List<Object> tmp = new ArrayList<Object>();
+		BeanAttribute atr = getAttribute(atrName);
+		for (Object element : list) {
 			Object value = atr.getValue(element);
 			if (value != null) {
 				if (contains((String) value, args)) {
@@ -272,5 +294,8 @@ public class BeanClass<T> {
 		list.removeAll(tmp);
 
 	}
+
+
+	 
 
 }

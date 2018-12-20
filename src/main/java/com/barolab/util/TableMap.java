@@ -9,33 +9,33 @@ import java.util.Map;
 
  
 
-public class TableMap<T> {
+public class TableMap {
 
-	private Map<String, Map<String, List<T>>> map = new HashMap<String, Map<String, List<T>>>();
+	private Map<String, Map<String, List<Object>>> map = new HashMap<String, Map<String, List<Object>>>();
 	private List<String> columnList = new ArrayList<String>();
 
-	Map<String, List<T>> rowMap = null;
-	List<T> valueList = null;
+	Map<String, List<Object>> rowMap = null;
+	List<Object> valueList = null;
 
-	public void put(String key1, String key2, T value) {
+	public void put(String key1, String key2, Object value) {
 		if (!columnList.contains(key2)) {
 			columnList.add(key2);
 		}
 		rowMap = map.get(key1);
 		if (rowMap == null) {
-			rowMap = new HashMap<String, List<T>>();
+			rowMap = new HashMap<String, List<Object>>();
 			map.put(key1, rowMap);
 		}
 
 		valueList = rowMap.get(key2);
 		if (valueList == null) {
-			valueList = new ArrayList<T>();
+			valueList = new ArrayList<Object>();
 			rowMap.put(key2, valueList);
 		}
 		valueList.add(value);
 	}
 
-	public List<T> get(String key1, String key2) {
+	public List<?> get(String key1, String key2) {
 		rowMap = map.get(key1);
 		if (rowMap != null) {
 			valueList = rowMap.get(key2);

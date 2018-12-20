@@ -15,9 +15,11 @@ public class BeanString extends BeanType   {
 		return null;
 	}
 
-	public int compare(BeanAttribute atr, Object target0, Object target1) {
+	public int compareTargetAtr(BeanAttribute atr, Object target0, Object target1) {
 		String s0 = getValue(atr, target0);
 		String s1 = getValue(atr, target1);
+		if ( s0 == null ) return 1;
+		if ( s1 == null ) return -1;
 		return s0.compareTo(s1);
 	}
 

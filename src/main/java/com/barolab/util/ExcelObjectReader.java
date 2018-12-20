@@ -66,7 +66,7 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 		Row row0 = sheet.getRow(0);
 		for (Cell cell : row0) {
 			String name = cell.getStringCellValue();
-			BeanAttribute attr = beanClass.findAttribute(name);
+			BeanAttribute attr = beanClass.getAttribute(name);
 			if (attr != null) {
 				colAttrs.add(attr);
 				attr.setXlsColIndex(cell.getColumnIndex());
