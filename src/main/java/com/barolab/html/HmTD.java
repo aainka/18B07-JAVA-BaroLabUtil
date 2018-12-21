@@ -41,8 +41,10 @@ public class HmTD extends HmObject {
 
 	}
 
-	public void add(Date spentOn) {
-		comp.add(spentOn.toLocaleString());
+	public void add(Date date) {
+		if ( date != null) {
+		comp.add(date.toLocaleString());
+		}
 
 	}
 
