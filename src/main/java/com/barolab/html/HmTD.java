@@ -1,14 +1,18 @@
 package com.barolab.html;
 
 import java.util.Date;
+import java.util.List;
+
+import Platform.DashConsole.OV_TimeEntry;
 
 public class HmTD extends HmObject {
 
 	private int width = 0;
 	private String align = null;
+	private String stagParam = new String();
 
 	public void toHTML(HttpPrintStream h) {
-		String stag = new String("<td");
+		String stag = new String("<td"+stagParam);
 		if (width > 0) {
 			stag += " width=" + width;
 		}
@@ -49,6 +53,11 @@ public class HmTD extends HmObject {
 
 	public HmTD setAligh(String align) {
 		this.align = align;
+		return this;
+	}
+
+	public HmTD setAttribute(String param, int value) {
+		stagParam += " "+param+"='"+value+"' ";
 		return this;
 	}
 

@@ -70,10 +70,10 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 			if (attr != null) {
 				colAttrs.add(attr);
 				attr.setXlsColIndex(cell.getColumnIndex());
-				log.info("col name = " + name + " attr=" + attr);
+				// log.info("col name = " + name + " attr=" + attr);
 			}
 		}
-		log.info("Read "+beanClass.getName()+ ".attribute# = " + colAttrs.size());
+	//	log.info("Read "+beanClass.getName()+ ".attribute# = " + colAttrs.size());
 
 		/**
 		 * make value Object list

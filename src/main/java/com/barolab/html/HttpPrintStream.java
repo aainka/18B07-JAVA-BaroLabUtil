@@ -26,12 +26,17 @@ public class HttpPrintStream extends PrintStream {
 		println(".mytable th, .mytable td { font-family:맑은 고딕; border:1px solid black; } ");
 		println("</style>");
 	}
+	
+	public void sprintf(String fmt, Object ... args) {
+		String msg = String.format(fmt, args);
+		println(msg+"\n");
+	}
 
 	File fp = new File("C:/tmp/test.html");
 	FileWriter fileWriter;
 
 	public void test() {
-		HtmlTable table = new HtmlTable();
+		HmTable table = new HmTable();
 	//	HtmlTR tr = new HtmlTr();
 		try {
 			FileWriter fileWriter = new FileWriter(fp);
