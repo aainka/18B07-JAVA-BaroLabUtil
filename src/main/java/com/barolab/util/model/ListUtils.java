@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.barolab.util.TableMap;
 
+import Platform.DashConsole.OV_Issue;
+import Platform.DashConsole.OV_LCM;
 import Platform.DashConsole.OV_TimeEntry;
 
 public abstract class ListUtils {
@@ -40,11 +42,21 @@ public abstract class ListUtils {
 	//*******************************
 	
 	public List<?> readExcel(String filename) {
-		return bClass.readExcel(filename, "sheet0");
+		return bClass.readExcel(filename, "Sheet1");
 	}
 	
 	public void writeExcel(String filename) {
-		bClass.writeExcel(filename, "sheet0", getList());
+		bClass.writeExcel(filename, "Sheet1", getList());
+	}
+
+	public static void copyTo(String cmValues, Object obj1, Object obj2) {
+		String[] atrNames = cmValues.split(",");
+		BeanClass bClass1 = BeanClass.getInstance(obj1.getClass());
+		BeanClass bClass2 = BeanClass.getInstance(obj1.getClass());
+		for ( String atrName : atrNames) {
+			Object value = bClass1.getAttribute(atrName).getValue(obj1);
+			bClass2.getAttribute(atrName).setValue(obj2, value);
+		}
 	}
 
 }
