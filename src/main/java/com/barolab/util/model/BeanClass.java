@@ -65,13 +65,17 @@ public class BeanClass {
 		}
 	}
 
-	public BeanAttribute getAttribute(String name) {
+	public BeanAttribute getAttribute(String atrName) {
 		for (BeanAttribute attr : attrs) {
-			if (attr.getName().equals(name)) {
+			if (attr.getName().equals(atrName)) {
+				return attr;
+			}
+			//log.fine("matching = " + attr.getName().toUpperCase()+", "+name);
+			if (attr.getName().toUpperCase().equals(atrName)) {
 				return attr;
 			}
 		}
-		log.info("Wrong Attribute Name = " + name);
+		log.info("XXX Wrong Attribute Name = " + atrName);
 		return null;
 	}
 
@@ -160,7 +164,7 @@ public class BeanClass {
 	private transient CellStyle cellStyleHeader;
 
 	public int writeExcel(String filename, String sheetname, List<?> list) {
-
+		workbook = new XSSFWorkbook();
 		cellStyleDate = workbook.createCellStyle();
 		CreationHelper createHelper = workbook.getCreationHelper();
 		short dateFormat = createHelper.createDataFormat().getFormat("yyyy-MM-dd");
@@ -293,6 +297,21 @@ public class BeanClass {
 		}
 		list.removeAll(tmp);
 
+	}
+	
+	// ********************************************************************
+	// Support Intrpreter
+	// ********************************************************************
+
+	public static Object getValue(Object target, String atrName) {
+		BeanClass bClass = BeanClass.getInstance(target.getClass());
+		return bClass.getAttribute(atrName).getValue(target);
+	}
+
+	public static void setValue(Object target, String atrName, Object value) {
+		BeanClass bClass = BeanClass.getInstance(target.getClass());
+		bClass.getAttribute(atrName).setValue(target, value);
+		
 	}
 
 

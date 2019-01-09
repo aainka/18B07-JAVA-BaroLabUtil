@@ -55,9 +55,9 @@ public class BeanAttribute {
 		return value;
 	}
 	
-	public void setValue(Object recObject, Object value) {
+	public void setValue(Object target, Object value) {
 		  try {
-			setter.invoke(recObject, value);
+			setter.invoke(target, value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
