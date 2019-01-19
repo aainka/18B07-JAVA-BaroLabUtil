@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -13,131 +14,142 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import lombok.Data;
+
+@Data
 public class TestFileRest {
+	
+	private String host;
+	private String homeDir;
 
-	private String url = "http://localhost:9292/api/V1/file"; // raspberry
+	private String host1 = "localhost:9292"; // raspberry
+	private String host2 = "100.99.14.164:9292"; // 13Floor
+	private String test_dir = "/root/restapi/";
 	HttpClient httpclient = new DefaultHttpClient();
-	Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss zzz").create();
+	Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
-	public List<OV_FileInfo> getDir(String dir) throws ClientProtocolException, IOException {
-		URI uri = null;
-		try {
-			URIBuilder builder = new URIBuilder();
-			builder.setScheme("http").setHost("localhost:9292").setPath("/api/V1/file") //
-					.setParameter("dir", dir);
-			uri = builder.build();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public List<OV_FileInfo> getDir(String dir) throws ClientProtocolException, IOException, URISyntaxException {
+		URIBuilder builder = new URIBuilder();
+		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
+				.setParameter("dir", dir);
+		URI uri = builder.build();
 		HttpGet request = new HttpGet(uri);
 		HttpResponse response = httpclient.execute(request);
-		if (response.getStatusLine().getStatusCode() != 200) {
-			System.out.println(response.getStatusLine());
-		}
-		/*
-		 * make return object
-		 */
-		List<OV_FileInfo> list = null;
-		HttpEntity entity = response.getEntity();
-		if (entity != null) {
-			String s = getEntityString(entity);
+		String s = getEntityString(response);
+		if (s != null) {
 			Type listType = new TypeToken<List<OV_FileInfo>>() {
 			}.getType();
-			list = gson.fromJson(s, listType);
+			List<OV_FileInfo> list = gson.fromJson(s, listType);
 			for (OV_FileInfo fi : list) {
-				System.out.println(fi.getName());
+				System.out.println(fi.json());
+			}
+			return list;
+		}
+		return null;
+	}
+
+	public OV_FileInfo readFile(String readfile) throws URISyntaxException, ClientProtocolException, IOException {
+		URIBuilder builder = new URIBuilder();
+		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
+				.setParameter("readfile", readfile);
+		URI uri = builder.build();
+		HttpGet request = new HttpGet(uri);
+		HttpResponse response = httpclient.execute(request);
+		String s = getEntityString(response);
+		if (s != null) {
+			OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
+			System.out.println( fileinfo.json());
+			return fileinfo;
+		}
+		return null;
+	}
+
+	public void writeFileDir(OV_FileInfo fi) throws ClientProtocolException, IOException, URISyntaxException {
+		URIBuilder builder = new URIBuilder();
+		builder.setScheme("http").setHost(host).setPath("/api/V1/file");
+		URI uri = builder.build();
+		HttpPost request = new HttpPost(uri);
+		if (fi != null) {
+			String json_string = gson.toJson(fi);
+			StringEntity entity = new StringEntity(json_string, "UTF-8");
+			entity.setContentType("application/json; charset=utf-8");
+			request.setEntity(entity);
+
+			HttpResponse response = httpclient.execute(request);
+			String s = getEntityString(response);
+			if (s != null) {
+				OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
+				fileinfo.json();
 			}
 		}
-		return list;
-
-//		HttpPost request = new HttpPost(url);
-//		String json_str = gson.toJson(args);
-//		StringEntity entity = new StringEntity(json_str, "UTF-8");
-//		entity.setContentType("application/json; charset=utf-8");
-//		request.setEntity(entity);
-//		HttpResponse response = httpclient.execute(request);
-//		HttpEntity resEntity = response.getEntity();
-//		if (resEntity != null) {
-//			String s = getEntityString(entity);
-//			System.out.println("POST: " + s);
-//		}
 //		EntityUtils.consumeQuietly(response.getEntity());
-//		return null;
 	}
-
-	public List<OV_FileInfo> readFile(String readfile) throws ClientProtocolException, IOException {
-		URI uri = null;
+	
+	public void test_write()   {
+		OV_FileInfo fi = new OV_FileInfo();
+		fi.setName(test_dir+"testmemo.dir");
+		fi.set_dir(true);
+		fi.setText_in_file("content_note");
 		try {
-			URIBuilder builder = new URIBuilder();
-			builder.setScheme("http").setHost("localhost:9292").setPath("/api/V1/file") //
-					.setParameter("readfile", readfile);
-			uri = builder.build();
-		} catch (URISyntaxException e) {
+			fi.setCreatedStr("2020-2-2 20:20:20");
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			writeFileDir(fi);
+		} catch (IOException | URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		HttpGet request = new HttpGet(uri);
-		HttpResponse response = httpclient.execute(request);
-		if (response.getStatusLine().getStatusCode() != 200) {
-			System.out.println(response.getStatusLine());
+	}
+	
+	public void test_read() {
+		OV_FileInfo fi = new OV_FileInfo();
+		try {
+			fi = readFile(test_dir+"testmemo.txt");
+		} catch (URISyntaxException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		/*
-		 * make return object
-		 */
-		List<OV_FileInfo> list = null;
-		HttpEntity entity = response.getEntity();
-		if (entity != null) {
-			String s = getEntityString(entity);
-			System.out.println("File.content=" + s);
-			Type listType = new TypeToken<List<OV_FileInfo>>() {
-			}.getType();
-			list = gson.fromJson(s, listType);
-			for (OV_FileInfo fi : list) {
-				System.out.println(fi.getName());
-			}
-		}
-		return list;
+		System.out.println("fi.s = "+fi.json());
 	}
 
-	private String getEntityString(HttpEntity entity) {
+	private String getEntityString(HttpResponse response) throws IOException, UnsupportedOperationException {
 		String sContent = null;
-		// System.out.println("Response content length: " +
-		// entity.getContentLength());
-		BufferedReader rd;
-		try {
-			rd = new BufferedReader(new InputStreamReader(entity.getContent(), "UTF-8"));
+		if (response.getStatusLine().getStatusCode() != 200) {
+			System.out.println(response.getStatusLine());
+		} else {
+			HttpEntity entity = response.getEntity();
+			BufferedReader reader;
+			reader = new BufferedReader(new InputStreamReader(entity.getContent(), "UTF-8"));
 			String line = "";
 			sContent = line;
-			while ((line = rd.readLine()) != null) {
-				// System.out.println(line);
+			while ((line = reader.readLine()) != null) {
 				sContent += line;
 			}
-		} catch (UnsupportedOperationException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		// System.out.println("ans=" + sContent);
 		return sContent;
 	}
 
 	public static void main(String arg[]) {
 		TestFileRest fr = new TestFileRest();
-		try {
-			for (int i = 1; i < 10000; i++) {
-				System.out.println("======================  " + i);
-				fr.getDir("c:/tmp/Doc");
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (int i = 1; i < 2; i++) {
+			System.out.println("======================  " + i);
+//			fr.getDir("/root/restapi");
+			 
+		//	fr.test_write();
+			 fr.test_read();
 		}
 	}
 }
