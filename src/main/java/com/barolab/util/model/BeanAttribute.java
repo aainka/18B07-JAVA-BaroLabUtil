@@ -58,6 +58,7 @@ public class BeanAttribute {
 	public void setValue(Object target, Object value) {
 		  try {
 			setter.invoke(target, value);
+		//	System.out.println("setter = "+setter+"value= %d "+value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

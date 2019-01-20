@@ -4,7 +4,7 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,13 +18,26 @@ public class OV_FileInfo {
 	private Date created;
 	private boolean is_dir;
 	private String text_in_file;
-	transient File fp;
-	transient private List<OV_FileInfo> children;
-	
-	public OV_FileInfo(File newfp, OV_FileInfo parent) {
-		this.fp = newfp;
-		this.name = newfp.getName();
-		this.
+	transient LinkedList<OV_FileInfo> children;
+	transient private OV_FileInfo parent;
+
+	public OV_FileInfo(String name, OV_FileInfo parent) {
+		this.name = name;
+		if (parent != null) {
+			this.parent = parent;
+			if (parent.children == null) {
+				parent.children = new LinkedList<OV_FileInfo>();
+			}
+			parent.children.add(this);
+		}
+		File fp = new File(name);
+		if (fp.isDirectory()) {
+			is_dir = true;
+		}
+	}
+
+	public OV_FileInfo() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public String json() {
@@ -38,5 +51,20 @@ public class OV_FileInfo {
 		created = transFormat.parse(msg);
 	}
 
+	public static void dumpTree(OV_FileInfo root) {
+		System.out.println("dumpTr: " + root.name);
+		if (root.children != null) {
+			for (OV_FileInfo fi : root.children) {
+				dumpTree(fi);
+			}
+		}
+	}
+
+	public void add(OV_FileInfo cfi) {
+		if (children == null) {
+			children = new LinkedList<OV_FileInfo>();
+		}
+		children.add(cfi);
+	}
 
 }

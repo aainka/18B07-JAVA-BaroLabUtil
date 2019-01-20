@@ -70,7 +70,7 @@ public class BeanClass {
 			if (attr.getName().equals(atrName)) {
 				return attr;
 			}
-			//log.fine("matching = " + attr.getName().toUpperCase()+", "+name);
+			// log.fine("matching = " + attr.getName().toUpperCase()+", "+name);
 			if (attr.getName().toUpperCase().equals(atrName)) {
 				return attr;
 			}
@@ -79,17 +79,16 @@ public class BeanClass {
 		return null;
 	}
 
-	
 	public Object matchAtrValue(List<?> list, String atrName, Object value) {
 		BeanAttribute bAtr = getAttribute(atrName);
-		
-		for ( Object element : list) {
+
+		for (Object element : list) {
 			Object atrValue = bAtr.getValue(element);
-			if ( bAtr.getBeanType().compareValue(bAtr, atrValue, value) == 0 ) {
+			if (bAtr.getBeanType().compareValue(bAtr, atrValue, value) == 0) {
 				return element;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -100,7 +99,7 @@ public class BeanClass {
 	public void sort(List<?> list, String... atr) {
 		AtrComparator comparator = new AtrComparator();
 		comparator.setAtr(atr);
-		Collections.sort( list, comparator);
+		Collections.sort(list, comparator);
 	}
 
 	private class AtrComparator implements Comparator<Object> {
@@ -120,7 +119,8 @@ public class BeanClass {
 				BeanAttribute bAtr = getAttribute(atr[clevel]);
 				// System.out.println("atr.compare = "+atrName+", bean = "+bAtr);
 				if (bAtr == null) {
-					log.severe("Can't found attribute = " + atr[clevel]);
+					// log.severe("Can't found attribute = " + atr[clevel]);
+					System.out.println("Can't found attribute = " + atr[clevel]);
 					return 0;
 				} else {
 					// BeanType beanType = TypeFactory.find(bAtr.getType().getName());
@@ -298,7 +298,7 @@ public class BeanClass {
 		list.removeAll(tmp);
 
 	}
-	
+
 	// ********************************************************************
 	// Support Intrpreter
 	// ********************************************************************
@@ -310,11 +310,10 @@ public class BeanClass {
 
 	public static void setValue(Object target, String atrName, Object value) {
 		BeanClass bClass = BeanClass.getInstance(target.getClass());
+		if ( value != null ) {
 		bClass.getAttribute(atrName).setValue(target, value);
-		
+		}
+
 	}
-
-
-	 
 
 }

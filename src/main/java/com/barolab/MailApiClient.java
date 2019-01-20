@@ -34,8 +34,8 @@ import com.google.gson.reflect.TypeToken;
 
 public class MailApiClient {
 
-	private String url = "http://110.13.71.93:9292/api/V1/mail"; // raspberry
-	// private String url = "http://211.239.124.246:19808/api/V1/mail"; // fun25
+	//private String url = "http://110.13.71.93:9292/api/V1/mail"; // raspberry
+	  private String url = "http://211.239.124.246:19808/api/V1/mail"; // fun25
 	HttpClient httpclient = new DefaultHttpClient();
 	private String session_token = null;
 	// private String apiKey =

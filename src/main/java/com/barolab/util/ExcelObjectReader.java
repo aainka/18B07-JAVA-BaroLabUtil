@@ -29,7 +29,7 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 	private Field[] vfields = new Field[100];
 	private DataFormatter dataFormatter = new DataFormatter();
  	private BeanClass beanClass = null;
-	private List<BeanAttribute> colAttrs = new LinkedList<BeanAttribute>();
+	private List<BeanAttribute> atrListByColumn = new LinkedList<BeanAttribute>();
 
 	public List<T> read(BeanClass beanClass, String sheetname, String filename) {
 		//beanClass.init(clazz);
@@ -68,9 +68,9 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 			String name = cell.getStringCellValue();
 			BeanAttribute attr = beanClass.getAttribute(name);
 			if (attr != null) {
-				colAttrs.add(attr);
+				atrListByColumn.add(attr);
 				attr.setXlsColIndex(cell.getColumnIndex());
-				// log.info("col name = " + name + " attr=" + attr);
+				//  log.info("atr-col mapping : Column ID " + cell.getColumnIndex() + " attr=" + attr);
 			}
 		}
 	//	log.info("Read "+beanClass.getName()+ ".attribute# = " + colAttrs.size());
@@ -83,13 +83,16 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 			if (row.getRowNum() == 0)
 				continue;
 			Object valueObject = beanClass.getClazz().newInstance();
-			for (BeanAttribute attr : colAttrs) { // Each Activated Attribute
+			for (BeanAttribute attr : atrListByColumn) { // Each Activated Attribute
 				Cell cell = row.getCell(attr.getXlsColIndex());
 				if (cell == null) {
-					log.warning("cell is not exist. col=" + attr.getXlsColIndex() + ", row=" + row.getRowNum()
-							+ ", sheet=" + sheet.getSheetName());
+//					log.warning("cell is not exist. col=" + attr.getXlsColIndex() + ", row=" + row.getRowNum()
+//							+ ", sheet=" + sheet.getSheetName());
 				} else {
+//					log.info("cell define col=" + attr.getXlsColIndex() + ", row=" + row.getRowNum()
+//					+ ", sheet=" + sheet.getSheetName());
 					CellType type = cell.getCellTypeEnum();
+					String sPos = ", row="+row.getRowNum()+", col="+attr.getXlsColIndex();
 					try {
 						switch (type.getCode()) {
 						case 0: // numeric and date
@@ -114,6 +117,8 @@ public class ExcelObjectReader <T> extends ExcelObjectDefault {
 						case 1: // String
 							String value = cell.getStringCellValue();
 							attr.getSetter().invoke(valueObject, value);
+						//	log.warning("value.string=" + value + sPos);
+						//	+ ", sheet=" + sheet.getSheetName());
 							break;
 						case 3: // BLANK
 							break;

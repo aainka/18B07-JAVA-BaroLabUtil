@@ -1,9 +1,6 @@
 package com.barolab.html;
 
 import java.util.Date;
-import java.util.List;
-
-import Platform.DashConsole.OV_TimeEntry;
 
 public class HmTD extends HmObject {
 
@@ -11,8 +8,8 @@ public class HmTD extends HmObject {
 	private String align = null;
 	private String stagParam = new String();
 
-	public void toHTML(HttpPrintStream h) {
-		String stag = new String("<td"+stagParam);
+	public void toHTML(HttpBuilder h) {
+		String stag = new String("<td" + stagParam);
 		if (width > 0) {
 			stag += " width=" + width;
 		}
@@ -37,13 +34,17 @@ public class HmTD extends HmObject {
 	}
 
 	public void add(String sValue) {
-		comp.add(sValue);
+		if (sValue == null) {
+			comp.add(" ");
+		} else {
+			comp.add(sValue);
+		}
 
 	}
 
 	public void add(Date date) {
-		if ( date != null) {
-		comp.add(date.toLocaleString());
+		if (date != null) {
+			comp.add(date.toLocaleString());
 		}
 
 	}
@@ -59,7 +60,7 @@ public class HmTD extends HmObject {
 	}
 
 	public HmTD setAttribute(String param, int value) {
-		stagParam += " "+param+"='"+value+"' ";
+		stagParam += " " + param + "='" + value + "' ";
 		return this;
 	}
 

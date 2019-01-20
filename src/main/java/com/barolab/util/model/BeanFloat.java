@@ -33,4 +33,11 @@ public class BeanFloat extends BeanType {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public int compareValue(BeanAttribute atr, Object value0, Object value1) {
+		float a = (float) value0;
+		float b = (float) value1;
+		return (int) ((int) a-b);
+	}
 }

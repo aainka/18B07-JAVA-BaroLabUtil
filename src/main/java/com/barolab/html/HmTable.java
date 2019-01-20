@@ -3,7 +3,7 @@ package com.barolab.html;
 public class HmTable extends HmObject {
 
 	@Override
-	public void toHTML(HttpPrintStream h) {
+	public void toHTML(HttpBuilder h) {
 		h.println("<table class='mytable' >");
 		for ( Object anObject : comp) {
 			HmObject hObject = (HmObject) anObject;
