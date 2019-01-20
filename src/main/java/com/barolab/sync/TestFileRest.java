@@ -92,7 +92,7 @@ public class TestFileRest {
 			String s = getEntityString(response);
 			if (s != null) {
 				OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
-				fileinfo.json();
+				// fileinfo.json();
 			}
 		}
 //		EntityUtils.consumeQuietly(response.getEntity());

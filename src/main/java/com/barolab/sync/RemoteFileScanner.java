@@ -8,7 +8,7 @@ public class RemoteFileScanner extends FileScanner {
 
 
 	
-	TestFileRest remote = new TestFileRest();
+	TestFileRest httpApi = new TestFileRest();
 	private String host;
 
 	public RemoteFileScanner(String  host) {
@@ -27,18 +27,18 @@ public class RemoteFileScanner extends FileScanner {
 		if ( homeDir == null ) {
 			homeDir = path;
 		}
-		remote.setHost(host);
+		httpApi.setHost(host);
 		/*
 		 * make node and scan
 		 */
-		System.out.println("host="+host+" path=" + path);
+	//	System.out.println("host="+host+" path=" + path);
 	//	OV_FileInfo myfi = new OV_FileInfo(path, parent, this);
 		try {
-			for (OV_FileInfo cfi : remote.getDir(path)) {
+			for (OV_FileInfo cfi : httpApi.getDir(path)) {
 				if ( IgnoreFile.ignore(cfi.getName()) ) {
 					continue;
 				}
-				myfi.add(cfi);
+				myfi.add(cfi, this);
 				if (!cfi.is_dir()) {
 				//	myfi.add(cfi);
 				}else  {
@@ -53,18 +53,13 @@ public class RemoteFileScanner extends FileScanner {
 		return myfi;
 	}
 
-	public static void main(String[] args) {
-//		OV_FileInfo root = new RemoteFileScanner("").scanAll(null, "/root");
-//		OV_FileInfo.dumpTree(root);
-
-	}
 
 	/*
 	 * Remote에 화일생성
 	 */
 	public void write(OV_FileInfo finfo ) {
 		try {
-			remote.writeFileDir(finfo);
+			httpApi.writeFileDir(finfo);
 		} catch (Exception   e) {
 			e.printStackTrace();
 		}
@@ -72,7 +67,16 @@ public class RemoteFileScanner extends FileScanner {
 
 	@Override
 	public void read(OV_FileInfo fi) {
-		// TODO Auto-generated method stub
+		System.out.println("Remote: Read");
+		OV_FileInfo a;
+		try {
+			a = httpApi.readFile(fi.getName());
+			fi.copyFrom(a);
+			System.out.println(a.json());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }

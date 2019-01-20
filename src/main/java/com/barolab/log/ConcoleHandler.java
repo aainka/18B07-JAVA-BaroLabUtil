@@ -1,6 +1,7 @@
 package com.barolab.log;
 
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class ConcoleHandler extends Handler {
@@ -23,6 +24,7 @@ public class ConcoleHandler extends Handler {
 		sLevel = sLevel.substring(0, 7);
 		String name = arg0.getSourceClassName();
 		name = name.substring(name.lastIndexOf(".") + 1, name.length());
+		 
 		String sMeter;
 		switch (arg0.getLevel().intValue()) {
 		case 900: // warnning

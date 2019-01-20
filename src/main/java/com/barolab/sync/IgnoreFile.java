@@ -13,4 +13,5 @@ public class IgnoreFile {
 		}
 		return false;
 	}
+
 }

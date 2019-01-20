@@ -79,15 +79,24 @@ public class OV_FileInfo {
 		}
 	}
 
-	public void add(OV_FileInfo cfi) {
+	public void add(OV_FileInfo cfi, FileScanner remote) {
 		if (children == null) {
 			children = new LinkedList<OV_FileInfo>();
 		}
 		children.add(cfi);
+		cfi.setFileScanner(remote);
 	}
 
 	public void read() {
 		fileScanner.read(this);
+	}
+
+	public void copyFrom(OV_FileInfo a) {
+		this.name = a.name;
+		this.created = a.created;
+		this.updated = a.updated;
+		this.text_in_file = a.text_in_file;
+		
 	}
 
 

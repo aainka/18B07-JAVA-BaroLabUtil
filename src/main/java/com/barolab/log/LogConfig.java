@@ -20,5 +20,11 @@ public class LogConfig {
 		log0.setLevel(level);
 		
 	}
+	
+	public void setLogLevel(Level newLevel, String scope) {
+		Logger logger = Logger.getLogger(scope);
+		logger.setLevel(newLevel);
+
+	}
 
 }
