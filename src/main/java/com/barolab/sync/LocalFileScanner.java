@@ -19,32 +19,29 @@ import lombok.extern.java.Log;
 @Log
 public class LocalFileScanner extends FileScanner {
 
-	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo myfi) throws IOException {
+	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo node) throws IOException {
 
-		String path = myfi.getName();
-
-		if (homeDir == null) {
-			homeDir = path;
+		if (node == null) {
+			node = new OV_FileInfo("", parent, this);
 		}
 
-		// System.out.println("path=" + path);
+		System.out.println("l.path= " + getName(node));
+		readTime(node);
+		File myfp = new File(getName(node));
 
-		// OV_FileInfo myfi = new OV_FileInfo(path, parent, this);
-		readTime(myfi);
-		File myfp = new File(path);
 		if (myfp.isDirectory()) {
-			myfi.set_dir(true);
+			node.set_dir(true);
 			for (File fp : myfp.listFiles()) {
-				String nPath = path + "/" + fp.getName();
+				String nPath = node.getPath() + "/" + fp.getName();
 				if (!IgnoreFile.ignore(nPath)) {
-					OV_FileInfo cfi = new OV_FileInfo(nPath, myfi, this);
-					readTime(cfi);
-					scanAll(myfi, cfi);
-				} else {
+					OV_FileInfo child = new OV_FileInfo(nPath, node, this);
+					readTime(child);
+					// System.out.println("l.path.c= " + getName(child) +" npath="+nPath );
+					scanAll(node, child);
 				}
 			}
 		}
-		return myfi;
+		return node;
 	}
 
 	@Override
@@ -59,10 +56,12 @@ public class LocalFileScanner extends FileScanner {
 
 	@Override
 	public void read(OV_FileInfo fi) {
+		String name = getName(fi);
 		BufferedReader br = null;
 		String msg = null;
 		try {
-			br = new BufferedReader(new FileReader(fi.getName()));
+			System.out.println("Local.read file=" + name);
+			br = new BufferedReader(new FileReader(name));
 			StringBuilder sb = new StringBuilder();
 			String line = br.readLine();
 			while (line != null) {
@@ -83,11 +82,12 @@ public class LocalFileScanner extends FileScanner {
 			}
 		}
 		System.out.println("xxxxxxxxxxxxxxxxxxxxxx");
-		log.info("xxxx"+fi.json());
+		log.info("xxxx" + fi.json());
 	}
 
 	private void readTime(OV_FileInfo fi) throws IOException {
-		File file = new File(fi.getName());
+		String name = getName(fi);
+		File file = new File(name);
 		Path p = Paths.get(file.getAbsolutePath());
 		BasicFileAttributes view = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
 		FileTime fileTime = view.creationTime();
@@ -97,7 +97,8 @@ public class LocalFileScanner extends FileScanner {
 
 	@Override
 	public void write(OV_FileInfo fi) {
-		File file = new File(fi.getName());
+		String name = getName(fi);
+		File file = new File(name);
 		FileWriter writer = null;
 		try {
 			// 기존 파일의 내용에 이어서 쓰려면 true를, 기존 내용을 없애고 새로 쓰려면 false를 지정한다.
@@ -119,7 +120,8 @@ public class LocalFileScanner extends FileScanner {
 	}
 
 	public void writeTime(OV_FileInfo fi) throws IOException {
-		File file = new File(fi.getName());
+		String name = getName(fi);
+		File file = new File(name);
 		Path filePath = Paths.get(file.getAbsolutePath());
 		BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
 		FileTime created = FileTime.fromMillis(fi.getCreated().getTime());

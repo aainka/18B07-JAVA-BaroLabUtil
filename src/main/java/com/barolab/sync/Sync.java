@@ -30,17 +30,20 @@ public class Sync {
 		LogConfig.setLevel("com.barolab.sync", Level.ALL);
 //		  syncProject("18004-DashConsole", "211.239.124.246:19808", "/proj7/GITHUB",
 //		  "C:/@SWDevelopment/workspace-java");
-		syncProject("18B07-BaroLabUtil", "211.239.124.246:19808", "/proj7/GITHUB", "C:/@SWDevelopment/workspace-java");
+	//	syncProject("18B07-BaroLabUtil", "211.239.124.246:19808", "/proj7/GITHUB", "C:/@SWDevelopment/workspace-java");
+		syncProject("18B07-BaroLabUtil", "211.239.124.246:19808", "/proj7/GITHUB", "S:/sw-dev/eclipse-workspace-18b");
 	}
 
 	public void syncProject(String projName, String host, String remoteDir, String localDir) throws IOException {
 		remote_host = host;
-		remote_homeDir = remoteDir + "/" + projName + "/";
-		local_path = localDir + "/" + projName + "/";
-		OV_FileInfo fs0 = local.scanAll(null, new OV_FileInfo(local_path, null, local));
-		OV_FileInfo fs1 = remote.scanAll(null, new OV_FileInfo(remote_homeDir, null, remote));
+//		remote_homeDir = remoteDir + "/" + projName + "/";
+//		local_path = localDir + "/" + projName + "/";
+		local.homeDir = localDir+ "/" + projName ;
+		remote.homeDir = remoteDir;
+		OV_FileInfo fs0 = local.scanAll(null, null);
+	//	OV_FileInfo fs1 = remote.scanAll(null, new OV_FileInfo(remote_homeDir, null, remote));
 	//	OV_FileInfo.dumpTree(fs0);
-		compare_to(fs0, fs1);
+	//	compare_to(fs0, fs1);
 	}
 
 	private void compare_to(OV_FileInfo fs0, OV_FileInfo fs1) {
@@ -50,7 +53,7 @@ public class Sync {
 		for (OV_FileInfo src : fs0.children) {
 			OV_FileInfo dst = find(src, fs1.children);
 			if (dst == null) {
-				System.out.println(">>>>> not_exist = " + src.getName());
+				System.out.println(">>>>> not_exist = " + remote.getName(src));
 				remoteWrite(src);
 			} else {
 				compareTime(src, dst);
@@ -75,27 +78,37 @@ public class Sync {
 	}
 
 	private void remoteGet(OV_FileInfo dst) {
-		log.info("<< "+dst.getPath());
+	 	log.info("<< "+dst.getPath());
+	 // if (true) return;
 		dst.read();
-		String homeDir = dst.getHomeDir();
-		String path = dst.getPath();
-		String name = local.getHomeDir() + dst.getPath();
-		dst.setName(name);
+//		String homeDir = dst.getHomeDir();
+//		String path = dst.getPath();
+//		String name = local.getHomeDir() + dst.getPath();
+//		dst.setName(name);
 		local.write(dst);
 	}
 
 	private void remoteWrite(OV_FileInfo src) {
 		log.info(">> "+src.getPath());
-		// if (true) return;
-		src.read();
-		String homeDir = src.getHomeDir();
-		String path = src.getPath();
-		String name = remote.getHomeDir() + src.getPath();
+//		String homeDir = src.getHomeDir();
+//		String path = src.getPath();
+//		String name = remote.getHomeDir() + src.getPath();
 //		System.out.println("homeDir=" + src.getHomeDir());
 //		System.out.println("Path=" + src.getPath());
 //		System.out.println("New=" + name);
-		src.setName(name);
-		remote.write(src); // @Todo cron to dst
+	//	src.setName(name);
+		if ( src.is_dir()) {
+			
+		} else {
+//			name = local.getHomeDir() + src.getPath();
+//			src.setName(name);
+			src.read();
+//			name = remote.getHomeDir() + src.getPath();
+//			src.setName(name);
+			remote.write(src); // @Todo cron to dst
+		}
+		// if (true) return;
+	
 	}
 
 	private OV_FileInfo find(OV_FileInfo t, LinkedList<OV_FileInfo> children) {

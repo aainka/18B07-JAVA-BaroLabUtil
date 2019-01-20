@@ -13,7 +13,8 @@ import lombok.Data;
 
 @Data
 public class OV_FileInfo {
-	private String name;
+//	private String name;
+	private String path;
 	private Date updated;
 	private Date created;
 	private boolean is_dir;
@@ -22,8 +23,8 @@ public class OV_FileInfo {
 	transient private OV_FileInfo parent;
 	transient private FileScanner fileScanner;
 
-	public OV_FileInfo(String name, OV_FileInfo parent, FileScanner fileScanner) {
-		this.name = name;
+	public OV_FileInfo(String path, OV_FileInfo parent, FileScanner fileScanner) {
+		this.path = path;
 		this.fileScanner = fileScanner;
 		if (parent != null) {
 			this.parent = parent;
@@ -32,7 +33,7 @@ public class OV_FileInfo {
 			}
 			parent.children.add(this);
 		}
-		File fp = new File(name);
+		File fp = new File(fileScanner.getName(this));
 		if (fp.isDirectory()) {
 			is_dir = true;
 		}
@@ -47,17 +48,17 @@ public class OV_FileInfo {
 	// #################################################################
 
 	public String getShortName() {
-		return name.substring(name.lastIndexOf("/") + 1, name.length());
+		return path.substring(path.lastIndexOf("/") + 1, path.length());
 	}
 	
-	public String getHomeDir() {
-		return fileScanner.getHomeDir();
-	}
+//	public String getHomeDir() {
+//		return fileScanner.getHomeDir();
+//	}
 	
-	public String getPath() {
-		int size = fileScanner.getHomeDir().length();
-		return name.substring(size+1);
-	}
+//	public String getPath() {
+//		int size = fileScanner.getHomeDir().length();
+//		return name.substring(size+1);
+//	}
 
 	public String json() {
 		Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -71,7 +72,7 @@ public class OV_FileInfo {
 	}
 
 	public static void dumpTree(OV_FileInfo root) {
-		System.out.println("dumpTr: " + root.name);
+		System.out.println("dumpTr: " + root.path);
 		if (root.children != null) {
 			for (OV_FileInfo fi : root.children) {
 				dumpTree(fi);
@@ -92,7 +93,7 @@ public class OV_FileInfo {
 	}
 
 	public void copyFrom(OV_FileInfo a) {
-		this.name = a.name;
+		this.path = a.path;
 		this.created = a.created;
 		this.updated = a.updated;
 		this.text_in_file = a.text_in_file;
