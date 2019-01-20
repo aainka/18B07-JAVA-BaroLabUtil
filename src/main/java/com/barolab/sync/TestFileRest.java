@@ -38,8 +38,7 @@ public class TestFileRest {
 
 	Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
-	public List<OV_FileInfo> getDir(String dir) throws ClientProtocolException, IOException, URISyntaxException {
-		host = host2;
+	public List<OV_FileInfo> getDir(String dir) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
 				.setParameter("dir", dir);
@@ -62,7 +61,7 @@ public class TestFileRest {
 		return null;
 	}
 
-	public OV_FileInfo readFile(String readfile) throws URISyntaxException, ClientProtocolException, IOException {
+	public OV_FileInfo readFile(String readfile) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
 				.setParameter("readfile", readfile);
@@ -78,13 +77,13 @@ public class TestFileRest {
 		return null;
 	}
 
-	public void writeFileDir(OV_FileInfo fi) throws ClientProtocolException, IOException, URISyntaxException {
+	public void writeFileDir(OV_FileInfo finfo) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file");
 		URI uri = builder.build();
 		HttpPost request = new HttpPost(uri);
-		if (fi != null) {
-			String json_string = gson.toJson(fi);
+		if (finfo != null) {
+			String json_string = gson.toJson(finfo);
 			StringEntity entity = new StringEntity(json_string, "UTF-8");
 			entity.setContentType("application/json; charset=utf-8");
 			request.setEntity(entity);
@@ -99,7 +98,7 @@ public class TestFileRest {
 //		EntityUtils.consumeQuietly(response.getEntity());
 	}
 
-	public void test_write() {
+	public void test_write() throws Exception {
 		OV_FileInfo fi = new OV_FileInfo();
 		fi.setName(test_dir + "testmemo.dir");
 		fi.set_dir(true);
@@ -119,7 +118,7 @@ public class TestFileRest {
 		}
 	}
 
-	public void test_read() {
+	public void test_read() throws Exception {
 		OV_FileInfo fi = new OV_FileInfo();
 		try {
 			fi = readFile(test_dir + "testmemo.txt");
@@ -130,10 +129,11 @@ public class TestFileRest {
 		System.out.println("fi.s = " + fi.json());
 	}
 
-	private String getEntityString(HttpResponse response) throws IOException, UnsupportedOperationException {
+	private String getEntityString(HttpResponse response) throws Exception {
 		String sContent = null;
 		if (response.getStatusLine().getStatusCode() != 200) {
 			System.out.println(response.getStatusLine());
+			throw new Exception("HTTP ERROR code="+response.getStatusLine().getStatusCode() );
 		} else {
 			HttpEntity entity = response.getEntity();
 			BufferedReader reader;
@@ -147,7 +147,7 @@ public class TestFileRest {
 		return sContent;
 	}
 
-	public static void main(String arg[]) {
+	public static void main(String arg[]) throws Exception {
 		TestFileRest fr = new TestFileRest();
 		for (int i = 1; i < 2; i++) {
 			System.out.println("======================  " + i);
@@ -162,4 +162,6 @@ public class TestFileRest {
 			//fr.test_read();
 		}
 	}
+
+	
 }

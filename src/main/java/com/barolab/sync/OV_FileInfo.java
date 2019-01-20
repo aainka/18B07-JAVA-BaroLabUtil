@@ -20,9 +20,11 @@ public class OV_FileInfo {
 	private String text_in_file;
 	transient LinkedList<OV_FileInfo> children;
 	transient private OV_FileInfo parent;
+	transient private FileScanner fileScanner;
 
-	public OV_FileInfo(String name, OV_FileInfo parent) {
+	public OV_FileInfo(String name, OV_FileInfo parent, FileScanner fileScanner) {
 		this.name = name;
+		this.fileScanner = fileScanner;
 		if (parent != null) {
 			this.parent = parent;
 			if (parent.children == null) {
@@ -38,6 +40,23 @@ public class OV_FileInfo {
 
 	public OV_FileInfo() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	// #################################################################
+	// ## Naming
+	// #################################################################
+
+	public String getShortName() {
+		return name.substring(name.lastIndexOf("/") + 1, name.length());
+	}
+	
+	public String getHomeDir() {
+		return fileScanner.getHomeDir();
+	}
+	
+	public String getPath() {
+		int size = fileScanner.getHomeDir().length();
+		return name.substring(size+1);
 	}
 
 	public String json() {
@@ -66,5 +85,11 @@ public class OV_FileInfo {
 		}
 		children.add(cfi);
 	}
+
+	public void read() {
+		fileScanner.read(this);
+	}
+
+
 
 }
