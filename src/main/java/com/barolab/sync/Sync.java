@@ -22,15 +22,21 @@ public class Sync {
 
 //	String remote_homeDir2 = "/proj7java-workspace/18B07-BaroLabUtil/";
 	// RemoteFileScanner remote = new RemoteFileScanner(remote_host, "/proj7");
-	LocalFileScanner local = new LocalFileScanner("xxx");
+//	LocalFileScanner local = new LocalFileScanner("xxx");
+
+	boolean lock = true;
 
 	public void sync() throws IOException {
 		LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
-		LocalFileScanner local = new LocalFileScanner("C:/tmp/project");
+
+		LocalFileScanner local = new LocalFileScanner("S:/tmp/18B07-BaroLabUtil");
 		OV_FileInfo a = local.scanAll();
-		RemoteFileScanner remote = new RemoteFileScanner("100.99.14.164:9292", "/root/project");
+		// RemoteFileScanner remote = new RemoteFileScanner("100.99.14.164:9292",
+		// "/root/project");
+//		RemoteFileScanner remote = new RemoteFileScanner("211.239.124.246:19808", "/proj7/GITHUB/18B07-BaroLabUtil/");
+		RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 		OV_FileInfo b = remote.scanAll();
-		compare_to(a, b);
+		compareFile(a, b);
 
 //		  syncProject("18004-DashConsole", "211.239.124.246:19808", "/proj7/GITHUB",
 //		  "C:/@SWDevelopment/workspace-java");
@@ -41,31 +47,33 @@ public class Sync {
 	}
 
 	public void syncProject(String projName, String host, String remoteDir, String localDir) throws IOException {
-		 
+
 //		remote_homeDir = remoteDir + "/" + projName + "/";
 //		local_path = localDir + "/" + projName + "/";
-		local.homeDir = localDir + "/" + projName;
-		 
-		OV_FileInfo fs0 = local.scanAll(null, null);
+		// local.homeDir = localDir + "/" + projName;
+
+		// OV_FileInfo fs0 = local.scanAll(null, null);
 		// OV_FileInfo fs1 = remote.scanAll(null, new OV_FileInfo(remote_homeDir, null,
 		// remote));
 		// OV_FileInfo.dumpTree(fs0);
 		// compare_to(fs0, fs1);
 	}
 
-	private void compare_to(OV_FileInfo fs0, OV_FileInfo fs1) {
-		log.info("test");
+	private void compareFile(OV_FileInfo fs0, OV_FileInfo fs1) {
+	
 		if (fs0.children == null) {
 			return;
 		}
 		for (OV_FileInfo src : fs0.children) {
 			OV_FileInfo dst = find(src, fs1.children);
 			if (dst == null) {
-				System.out.println(">>>>> not_exist = " + src.getFullPath());
-				remoteWrite(src, fs1.getScanner());
+				log.info("--> not_exist = " + src.getFullPath());
+				if (remoteWrite(src, fs1.getScanner())) {
+				compareFile(src, dst); // recursive
+				}
 			} else {
 				compareTime(src, dst);
-				compare_to(src, dst); // recursive
+				compareFile(src, dst); // recursive
 			}
 		}
 	}
@@ -76,11 +84,13 @@ public class Sync {
 		long diff = d0 - s0;
 		if (diff != 0) {
 			if (diff < 0) {
-				System.out.println("--> time =" + (d0 - s0) + " " + src.getPath());
-				remoteWrite(src,dst.getScanner());
+				log.info("--> " +src.getFullPath()+", t="+diff);
+				if (!lock)
+					remoteWrite(src, dst.getScanner());
 			} else {
-				System.out.println("<-- time =" + (d0 - s0) + " " + src.getPath());
-				remoteGet(dst,src.getScanner());
+				log.info("<-- " +src.getFullPath()+", t="+diff);
+				if (!lock)
+					remoteGet(dst, src.getScanner());
 			}
 		}
 	}
@@ -91,9 +101,8 @@ public class Sync {
 		scanner.write(dst);
 	}
 
-	private void remoteWrite(OV_FileInfo src, FileScanner scanner) {
-		System.out.println("uuuuuuuuuuuuuuuuuuuuuu");
-		log.info(">> " + src.getPath());
+	private boolean remoteWrite(OV_FileInfo src, FileScanner scanner) {
+		log.info(" -> " + src.getFullPath());
 //		String homeDir = src.getHomeDir();
 //		String path = src.getPath();
 //		String name = remote.getHomeDir() + src.getPath();
@@ -102,17 +111,18 @@ public class Sync {
 //		System.out.println("New=" + name);
 		// src.setName(name);
 		if (src.is_dir()) {
-
+return scanner.write(src);
 		} else {
 //			name = local.getHomeDir() + src.getPath();
 //			src.setName(name);
 			src.read();
-			System.out.println("SRC.READ="+src.json());
+			System.out.println("SRC.READ=" + src.json());
 //			name = remote.getHomeDir() + src.getPath();
 //			src.setName(name);
 			scanner.write(src); // @Todo cron to dst
 		}
 		// if (true) return;
+		return false;
 
 	}
 

@@ -23,5 +23,5 @@ public abstract class FileScanner {
 
 	abstract public void read(OV_FileInfo fi);
 
-	abstract public void write(OV_FileInfo fi);
+	abstract public boolean write(OV_FileInfo fi);
 }

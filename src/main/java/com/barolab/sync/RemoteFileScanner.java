@@ -14,12 +14,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.mortbay.log.Log;
+import lombok.extern.java.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+@Log
 public class RemoteFileScanner extends FileScanner {
 
 //	TestFileRest httpApi = null;
@@ -42,12 +43,12 @@ public class RemoteFileScanner extends FileScanner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		OV_FileInfo.dumpTree(root);
+		// OV_FileInfo.dumpTree(root);
 		return root;
 	}
 
 	public void scan(OV_FileInfo node) throws Exception {
-		System.out.println(node.getFullPath());
+		// System.out.println(node.getFullPath());
 		if (node.is_dir()) {
 			List<OV_FileInfo> list = getDir(node.getPath());
 			for (OV_FileInfo child : list) {
@@ -98,23 +99,32 @@ public class RemoteFileScanner extends FileScanner {
 		}
 		return null;
 	}
+
 	/*
 	 * Remote에 화일생성
 	 */
-	public void write(OV_FileInfo finfo) {
-		Log.info("write");
+	public boolean write(OV_FileInfo finfo) {
+		log.info("write");
+		OV_FileInfo a;
 		try {
-			writeFileDir(finfo);
+			a = httpWrite(finfo);
+			if ( a != null) {
+				return true;
+			}
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
+		
 	}
-	public void writeFileDir(OV_FileInfo finfo) throws Exception {
+
+	public OV_FileInfo httpWrite(OV_FileInfo finfo) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
 				.setParameter("home", homeDir);
 		URI uri = builder.build();
-		System.out.print("wr-file uri"+uri);
+		log.info(uri.toString());
 		HttpPost request = new HttpPost(uri);
 		if (finfo != null) {
 			String json_string = gson.toJson(finfo);
@@ -124,13 +134,16 @@ public class RemoteFileScanner extends FileScanner {
 
 			HttpResponse response = httpclient.execute(request);
 			String s = getEntityString(response);
-			Log.info(s);
 			if (s != null) {
 				OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
 				// fileinfo.json();
+				log.info("OK="+s);
+				return fileinfo;
 			}
+			
 		}
 //		EntityUtils.consumeQuietly(response.getEntity());
+		return null;
 	}
 
 	private String getEntityString(HttpResponse response) throws Exception {
@@ -181,12 +194,10 @@ public class RemoteFileScanner extends FileScanner {
 		return myfi;
 	}
 
-	
-
 	@Override
 	public void read(OV_FileInfo fi) {
-	//	System.out.println("Remote: Read");
-		//String name = getName(fi);
+		// System.out.println("Remote: Read");
+		// String name = getName(fi);
 		OV_FileInfo a;
 		try {
 			a = readFile(fi.getPath());

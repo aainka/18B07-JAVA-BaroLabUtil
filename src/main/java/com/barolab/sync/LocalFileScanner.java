@@ -26,7 +26,7 @@ public class LocalFileScanner extends FileScanner {
 	public OV_FileInfo scanAll() {
 		OV_FileInfo root = new OV_FileInfo("", null, this);
 		scan(root);
-		OV_FileInfo.dumpTree(root);
+	//	OV_FileInfo.dumpTree(root);
 		return root;
 	}
 
@@ -132,20 +132,29 @@ public class LocalFileScanner extends FileScanner {
 			e.printStackTrace();
 		}
 	}
-
+	
+	// #########################################################################
+	// ## Read / Write
+	// #########################################################################
+	
 	@Override
-	public void write(OV_FileInfo fi) {
-
+	public boolean write(OV_FileInfo fi) {
 		log.info("write =" + fi.json());
-
 		File file = new File(homeDir + "/" + fi.getPath());
 		FileWriter writer = null;
 		try {
-			// 기존 파일의 내용에 이어서 쓰려면 true를, 기존 내용을 없애고 새로 쓰려면 false를 지정한다.
-			writer = new FileWriter(file, false);
+			writer = new FileWriter(file, false); // append mode true
 			writer.write(fi.getText_in_file());
 			writer.flush();
-			writeTime(fi);
+		//	writeTime(fi);
+			{
+				//File file = new File(homeDir + "/" + fi.getPath());
+				Path filePath = Paths.get(file.getAbsolutePath());
+				BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
+				FileTime created = FileTime.fromMillis(fi.getCreated().getTime());
+				FileTime updated = FileTime.fromMillis(fi.getUpdated().getTime());
+				attributes.setTimes(updated, updated, created); // lastModified, lastAccess, Created
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -156,17 +165,10 @@ public class LocalFileScanner extends FileScanner {
 				e.printStackTrace();
 			}
 		}
+		return true;
 
 	}
 
-	public void writeTime(OV_FileInfo fi) throws IOException {
-
-		File file = new File(homeDir + "/" + fi.getPath());
-		Path filePath = Paths.get(file.getAbsolutePath());
-		BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
-		FileTime created = FileTime.fromMillis(fi.getCreated().getTime());
-		FileTime updated = FileTime.fromMillis(fi.getUpdated().getTime());
-		attributes.setTimes(updated, updated, created); // lastModified, lastAccess, Created
-	}
+ 
 
 }
