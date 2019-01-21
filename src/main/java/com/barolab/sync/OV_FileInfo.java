@@ -13,7 +13,6 @@ import lombok.Data;
 
 @Data
 public class OV_FileInfo {
-//	private String name;
 	private String path;
 	private Date updated;
 	private Date created;
@@ -21,11 +20,11 @@ public class OV_FileInfo {
 	private String text_in_file;
 	transient LinkedList<OV_FileInfo> children;
 	transient private OV_FileInfo parent;
-	transient private FileScanner fileScanner;
+	transient private FileScanner scanner;
 
 	public OV_FileInfo(String path, OV_FileInfo parent, FileScanner fileScanner) {
 		this.path = path;
-		this.fileScanner = fileScanner;
+		this.scanner = fileScanner;
 		if (parent != null) {
 			this.parent = parent;
 			if (parent.children == null) {
@@ -33,7 +32,7 @@ public class OV_FileInfo {
 			}
 			parent.children.add(this);
 		}
-		File fp = new File(fileScanner.getName(this));
+		File fp = new File(this.getFullPath());
 		if (fp.isDirectory()) {
 			is_dir = true;
 		}
@@ -42,7 +41,7 @@ public class OV_FileInfo {
 	public OV_FileInfo() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	// #################################################################
 	// ## Naming
 	// #################################################################
@@ -50,15 +49,22 @@ public class OV_FileInfo {
 	public String getShortName() {
 		return path.substring(path.lastIndexOf("/") + 1, path.length());
 	}
-	
-//	public String getHomeDir() {
-//		return fileScanner.getHomeDir();
-//	}
-	
-//	public String getPath() {
-//		int size = fileScanner.getHomeDir().length();
-//		return name.substring(size+1);
-//	}
+
+	public String getFullPath() {
+		if (path == null || path.length() <= 0) {
+			return scanner.homeDir;
+		} else {
+			return scanner.homeDir + "/" + path;
+		}
+	}
+
+	public String getFullPath(RemoteFileScanner scanner0) {
+		if (path == null || path.length() <= 0) {
+			return scanner0.homeDir;
+		} else {
+			return scanner0.homeDir + "/" + path;
+		}
+	}
 
 	public String json() {
 		Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
@@ -69,10 +75,11 @@ public class OV_FileInfo {
 	public void setCreatedStr(String msg) throws ParseException {
 		SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		created = transFormat.parse(msg);
+		updated = created;
 	}
 
 	public static void dumpTree(OV_FileInfo root) {
-		System.out.println("dumpTr: " + root.path);
+		System.out.println("dumpTr: " + root.getFullPath());
 		if (root.children != null) {
 			for (OV_FileInfo fi : root.children) {
 				dumpTree(fi);
@@ -80,16 +87,16 @@ public class OV_FileInfo {
 		}
 	}
 
-	public void add(OV_FileInfo cfi, FileScanner remote) {
+	public void add(OV_FileInfo child) {
 		if (children == null) {
 			children = new LinkedList<OV_FileInfo>();
 		}
-		children.add(cfi);
-		cfi.setFileScanner(remote);
+		children.add(child);
+		child.setScanner(scanner);
 	}
 
 	public void read() {
-		fileScanner.read(this);
+		scanner.read(this);
 	}
 
 	public void copyFrom(OV_FileInfo a) {
@@ -97,9 +104,7 @@ public class OV_FileInfo {
 		this.created = a.created;
 		this.updated = a.updated;
 		this.text_in_file = a.text_in_file;
-		
+
 	}
-
-
 
 }

@@ -19,15 +19,50 @@ import lombok.extern.java.Log;
 @Log
 public class LocalFileScanner extends FileScanner {
 
+	public LocalFileScanner(String homeDir) {
+		this.homeDir = homeDir;
+	}
+
+	public OV_FileInfo scanAll() {
+		OV_FileInfo root = new OV_FileInfo("", null, this);
+		scan(root);
+		OV_FileInfo.dumpTree(root);
+		return root;
+	}
+
+	public void scan(OV_FileInfo node) {
+		// System.out.println(node.getFullPath());
+		readTime(node);
+		File fp = new File(node.getFullPath());
+		if (fp.isDirectory()) {
+			node.set_dir(true);
+			for (File fpChild : fp.listFiles()) {
+				String pathChild = node.getFullPath() + "/" + fpChild.getName();
+				if (!IgnoreFile.ignore(pathChild)) {
+					OV_FileInfo child = null;
+					if (node.getPath().length() > 0) {
+						child = new OV_FileInfo(node.getPath() + "/" + fpChild.getName(), node, this);
+					} else {
+						child = new OV_FileInfo(fpChild.getName(), node, this);
+					}
+					scan(child);
+				}
+			}
+		}
+
+	}
+
+	// ##########################################################
+
 	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo node) throws IOException {
 
 		if (node == null) {
 			node = new OV_FileInfo("", parent, this);
 		}
 
-		System.out.println("l.path= " + getName(node));
+		System.out.println("l.path= " + node.getFullPath());
 		readTime(node);
-		File myfp = new File(getName(node));
+		File myfp = new File(node.getFullPath());
 
 		if (myfp.isDirectory()) {
 			node.set_dir(true);
@@ -56,7 +91,7 @@ public class LocalFileScanner extends FileScanner {
 
 	@Override
 	public void read(OV_FileInfo fi) {
-		String name = getName(fi);
+		String name = fi.getFullPath();
 		BufferedReader br = null;
 		String msg = null;
 		try {
@@ -81,24 +116,29 @@ public class LocalFileScanner extends FileScanner {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("xxxxxxxxxxxxxxxxxxxxxx");
-		log.info("xxxx" + fi.json());
+		log.info(fi.json());
 	}
 
-	private void readTime(OV_FileInfo fi) throws IOException {
-		String name = getName(fi);
-		File file = new File(name);
-		Path p = Paths.get(file.getAbsolutePath());
-		BasicFileAttributes view = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
-		FileTime fileTime = view.creationTime();
-		fi.setCreated(new Date((view.creationTime().toMillis() / 1000) * 1000));
-		fi.setUpdated(new Date((view.lastModifiedTime().toMillis() / 1000) * 1000));
+	private void readTime(OV_FileInfo fi) {
+		try {
+			File file = new File(homeDir + "/" + fi.getPath());
+			Path p = Paths.get(file.getAbsolutePath());
+			BasicFileAttributes view = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
+			FileTime fileTime = view.creationTime();
+			fi.setCreated(new Date((view.creationTime().toMillis() / 1000) * 1000));
+			fi.setUpdated(new Date((view.lastModifiedTime().toMillis() / 1000) * 1000));
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void write(OV_FileInfo fi) {
-		String name = getName(fi);
-		File file = new File(name);
+
+		log.info("write =" + fi.json());
+
+		File file = new File(homeDir + "/" + fi.getPath());
 		FileWriter writer = null;
 		try {
 			// 기존 파일의 내용에 이어서 쓰려면 true를, 기존 내용을 없애고 새로 쓰려면 false를 지정한다.
@@ -120,8 +160,8 @@ public class LocalFileScanner extends FileScanner {
 	}
 
 	public void writeTime(OV_FileInfo fi) throws IOException {
-		String name = getName(fi);
-		File file = new File(name);
+
+		File file = new File(homeDir + "/" + fi.getPath());
 		Path filePath = Paths.get(file.getAbsolutePath());
 		BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
 		FileTime created = FileTime.fromMillis(fi.getCreated().getTime());
