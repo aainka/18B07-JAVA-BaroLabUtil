@@ -29,7 +29,7 @@ public class HttpBuilder {
 
 		File file = new File(filename);
 		FileWriter writer = null;
-		writer = new FileWriter(file, true);
+		writer = new FileWriter(file, false); // false, always new file
 		writer.write(toString());
 		writer.flush();
 		writer.close();
@@ -131,7 +131,7 @@ public class HttpBuilder {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(msg);
+		//System.out.println(msg);
 		return msg;
 	}
 

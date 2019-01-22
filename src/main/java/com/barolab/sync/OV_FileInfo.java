@@ -21,6 +21,7 @@ public class OV_FileInfo {
 	transient LinkedList<OV_FileInfo> children;
 	transient private OV_FileInfo parent;
 	transient private FileScanner scanner;
+	transient private boolean childChanaged = false;
 
 	public OV_FileInfo(String path, OV_FileInfo parent, FileScanner fileScanner) {
 		this.path = path;

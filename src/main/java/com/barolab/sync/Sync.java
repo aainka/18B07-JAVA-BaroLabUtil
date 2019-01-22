@@ -11,69 +11,104 @@ import lombok.extern.java.Log;
 @Log
 public class Sync {
 
-//	String remote_host = "211.239.124.246:19808"; // f25
-//	String remote_host2 = "110.13.71.93:9292"; // H1
-
 //	String remote_homeDir = "/proj7/GITHUB/18B07-BaroLabUtil/";
 //	String local_path = "C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/";
 
-	String remote_homeDir = "/proj7/GITHUB/18004-DashConsole/";
-	String local_path = "C:/@SWDevelopment/workspace-java/18004-DashConsole/";
+//	String remote_homeDir = "/proj7/GITHUB/18004-DashConsole/";
+//	String local_path = "C:/@SWDevelopment/workspace-java/18004-DashConsole/";
 
 //	String remote_homeDir2 = "/proj7java-workspace/18B07-BaroLabUtil/";
 	// RemoteFileScanner remote = new RemoteFileScanner(remote_host, "/proj7");
 //	LocalFileScanner local = new LocalFileScanner("xxx");
+	// RemoteFileScanner remote = new RemoteFileScanner(host13F,
+	// "/root/project");
+//	RemoteFileScanner remote = new RemoteFileScanner(hostFun25, "/proj7/GITHUB/18B07-BaroLabUtil/");
+//	  syncProject("18004-DashConsole", hostFun25, "/proj7/GITHUB",
+//	  "C:/@SWDevelopment/workspace-java");
+	// syncProject("18B07-BaroLabUtil", hostFun25, "/proj7/GITHUB",
+	// "C:/@SWDevelopment/workspace-java");
+	// syncProject("18B07-BaroLabUtil", hostFun25, "/proj7/GITHUB",
+	// "S:/sw-dev/eclipse-workspace-18b");
+	// LocalFileScanner local = new LocalFileScanner("S:/tmp/18B07-BaroLabUtil");
+//	
+//
+//	RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 
 	boolean lock = true;
+	LocalFileScanner local;
+	RemoteFileScanner remote;
+
+	String hostHomeOne = "110.13.71.93:9292";
+	String host13F = "100.99.14.164:9292";
+	String hostFun25 = "211.239.124.246:19808";
+	String hostLocal = "192.168.25.50:9292";
+	
+	StringBuilder xx = new StringBuilder();
+
+	private void config_one() {
+		// local = new LocalFileScanner("C:/tmp/project");
+		// S:\sw-dev\eclipse-workspace-18b
+		// local = new
+		// LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
+		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
+		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18B07-BaroLabUtil");
+//		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18004-DashConsole");
+//		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18004-DashConsole");
+	}
+
+	public void test() {
+		// syncProject("18B07-BaroLabUtil", hostLocal, "/root/project",
+		// "C:/@SWDevelopment/workspace-java");
+		syncProject("18B07-BaroLabUtil", hostLocal, "/root/project", "S:/sw-dev/eclipse-workspace-18b");
+	}
+
+	public void syncProject(String projName, String host, String remoteDir, String localDir) {
+		System.out.println("Project=" + projName);
+		LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+		local = new LocalFileScanner(localDir + "/" + projName);
+		remote = new RemoteFileScanner(host, remoteDir + "/" + projName);
+		// config_one();
+		OV_FileInfo a = local.scanAll();
+		OV_FileInfo b = remote.scanAll();
+		compareFile(a, b);
+		System.out.println("Completed");
+		System.out.println(xx.toString());
+	}
 
 	public void sync() throws IOException {
 		LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
-
-		LocalFileScanner local = new LocalFileScanner("S:/tmp/18B07-BaroLabUtil");
+		config_one();
 		OV_FileInfo a = local.scanAll();
-		// RemoteFileScanner remote = new RemoteFileScanner("100.99.14.164:9292",
-		// "/root/project");
-//		RemoteFileScanner remote = new RemoteFileScanner("211.239.124.246:19808", "/proj7/GITHUB/18B07-BaroLabUtil/");
-		RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 		OV_FileInfo b = remote.scanAll();
 		compareFile(a, b);
-
-//		  syncProject("18004-DashConsole", "211.239.124.246:19808", "/proj7/GITHUB",
-//		  "C:/@SWDevelopment/workspace-java");
-		// syncProject("18B07-BaroLabUtil", "211.239.124.246:19808", "/proj7/GITHUB",
-		// "C:/@SWDevelopment/workspace-java");
-		// syncProject("18B07-BaroLabUtil", "211.239.124.246:19808", "/proj7/GITHUB",
-		// "S:/sw-dev/eclipse-workspace-18b");
+		System.out.println("Completed");
 	}
 
-	public void syncProject(String projName, String host, String remoteDir, String localDir) throws IOException {
-
-//		remote_homeDir = remoteDir + "/" + projName + "/";
-//		local_path = localDir + "/" + projName + "/";
-		// local.homeDir = localDir + "/" + projName;
-
-		// OV_FileInfo fs0 = local.scanAll(null, null);
-		// OV_FileInfo fs1 = remote.scanAll(null, new OV_FileInfo(remote_homeDir, null,
-		// remote));
-		// OV_FileInfo.dumpTree(fs0);
-		// compare_to(fs0, fs1);
-	}
-
-	private void compareFile(OV_FileInfo fs0, OV_FileInfo fs1) {
-	
-		if (fs0.children == null) {
-			return;
-		}
-		for (OV_FileInfo src : fs0.children) {
-			OV_FileInfo dst = find(src, fs1.children);
-			if (dst == null) {
-				log.info("--> not_exist = " + src.getFullPath());
-				if (remoteWrite(src, fs1.getScanner())) {
-				compareFile(src, dst); // recursive
+	/**
+	 * Directory time must be changed after all node changed under own directory.
+	 * 
+	 * @param srcParent
+	 * @param dstParent
+	 */
+	private void compareFile(OV_FileInfo srcParent, OV_FileInfo dstParent) {
+		if (srcParent.children != null) {
+			for (OV_FileInfo src : srcParent.children) {
+				OV_FileInfo dst = find(src, dstParent.children);
+				if (dst == null) {
+					report("--> not_exist = " + src.getFullPath());
+					log.info("--> not_exist = " + src.getFullPath());
+					dst = remoteWrite(src, dstParent.getScanner()); // create node
+					if (dst != null) {
+						srcParent.setChildChanaged(true);
+						compareFile(src, dst);
+					} // recursive
+				} else {
+					compareTime(src, dst);
+					compareFile(src, dst); // recursive
 				}
-			} else {
-				compareTime(src, dst);
-				compareFile(src, dst); // recursive
+			}
+			if (srcParent.is_dir() && srcParent.isChildChanaged()) {
+				remoteWrite(srcParent, dstParent.getScanner()); // overwrite time
 			}
 		}
 	}
@@ -84,13 +119,17 @@ public class Sync {
 		long diff = d0 - s0;
 		if (diff != 0) {
 			if (diff < 0) {
-				log.info("--> " +src.getFullPath()+", t="+diff);
-				if (!lock)
+				report("--> " + src.getFullPath() + ", t=" + diff);
+				log.info("--> " + src.getFullPath() + ", t=" + diff);
+				if (!lock  ) {
 					remoteWrite(src, dst.getScanner());
+					src.getParent().setChildChanaged(true);
+				}
 			} else {
-				log.info("<-- " +src.getFullPath()+", t="+diff);
-				if (!lock)
-					remoteGet(dst, src.getScanner());
+				report("<-- " + src.getFullPath() + ", t=" + diff);
+				if (!lock) {
+					// remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
+				}
 			}
 		}
 	}
@@ -101,28 +140,21 @@ public class Sync {
 		scanner.write(dst);
 	}
 
-	private boolean remoteWrite(OV_FileInfo src, FileScanner scanner) {
+	private OV_FileInfo remoteWrite(OV_FileInfo src, FileScanner scanner) {
 		log.info(" -> " + src.getFullPath());
-//		String homeDir = src.getHomeDir();
-//		String path = src.getPath();
-//		String name = remote.getHomeDir() + src.getPath();
-//		System.out.println("homeDir=" + src.getHomeDir());
-//		System.out.println("Path=" + src.getPath());
-//		System.out.println("New=" + name);
-		// src.setName(name);
+		OV_FileInfo np = null;
 		if (src.is_dir()) {
-return scanner.write(src);
-		} else {
-//			name = local.getHomeDir() + src.getPath();
-//			src.setName(name);
 			src.read();
-			System.out.println("SRC.READ=" + src.json());
-//			name = remote.getHomeDir() + src.getPath();
-//			src.setName(name);
-			scanner.write(src); // @Todo cron to dst
+			np = scanner.write(src);
+		} else {
+			src.read();
+			// System.out.println("SRC.READ=" + src.json());
+			np = scanner.write(src); // @Todo cron to dst
 		}
-		// if (true) return;
-		return false;
+		if (np != null) {
+			np.setScanner(scanner);
+		}
+		return np;
 
 	}
 
@@ -138,14 +170,13 @@ return scanner.write(src);
 		}
 		return null;
 	}
+	
+	private void report(String msg) {
+		xx.append(msg+"\n");
+	}
 
 	public static void main(String[] args) {
-		try {
-			new Sync().sync();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		new Sync().test();
 
 	}
 

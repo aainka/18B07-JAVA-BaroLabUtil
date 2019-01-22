@@ -102,13 +102,6 @@ public class TestFileRest {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-		try {
-			scanner.writeFileDir(fi);
-		} catch (IOException | URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	private String getEntityString(HttpResponse response) throws Exception {

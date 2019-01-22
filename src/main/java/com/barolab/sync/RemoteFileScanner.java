@@ -103,19 +103,15 @@ public class RemoteFileScanner extends FileScanner {
 	/*
 	 * Remote에 화일생성
 	 */
-	public boolean write(OV_FileInfo finfo) {
-		log.info("write");
-		OV_FileInfo a;
+	public OV_FileInfo write(OV_FileInfo finfo) {
+		log.info("httpWrite");
+		OV_FileInfo a = null;
 		try {
 			a = httpWrite(finfo);
-			if ( a != null) {
-				return true;
-			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		return a;
 		
 	}
 

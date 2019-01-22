@@ -26,7 +26,7 @@ public class LocalFileScanner extends FileScanner {
 	public OV_FileInfo scanAll() {
 		OV_FileInfo root = new OV_FileInfo("", null, this);
 		scan(root);
-	//	OV_FileInfo.dumpTree(root);
+		// OV_FileInfo.dumpTree(root);
 		return root;
 	}
 
@@ -90,69 +90,72 @@ public class LocalFileScanner extends FileScanner {
 	// #########################################################################
 
 	@Override
-	public void read(OV_FileInfo fi) {
-		String name = fi.getFullPath();
-		BufferedReader br = null;
-		String msg = null;
-		try {
-			System.out.println("Local.read file=" + name);
-			br = new BufferedReader(new FileReader(name));
-			StringBuilder sb = new StringBuilder();
-			String line = br.readLine();
-			while (line != null) {
-				sb.append(line);
-				sb.append("\n");
-				line = br.readLine();
-			}
-			fi.setText_in_file(sb.toString());
-			readTime(fi);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
+	public void read(OV_FileInfo node) {
+		String name = node.getFullPath();
+		readTime(node);
+
+		if (!node.is_dir()) {
+			BufferedReader br = null;
+			String msg = null;
 			try {
-				br.close();
+				System.out.println("Local.read file=" + name);
+				br = new BufferedReader(new FileReader(name));
+				StringBuilder sb = new StringBuilder();
+				String line = br.readLine();
+				while (line != null) {
+					sb.append(line);
+					sb.append("\n");
+					line = br.readLine();
+				}
+				node.setText_in_file(sb.toString());
+
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-		log.info(fi.json());
+		log.info(node.json());
 	}
 
-	private void readTime(OV_FileInfo fi) {
+	private void readTime(OV_FileInfo node) {
 		try {
-			File file = new File(homeDir + "/" + fi.getPath());
+			File file = new File(homeDir + "/" + node.getPath());
 			Path p = Paths.get(file.getAbsolutePath());
 			BasicFileAttributes view = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
 			FileTime fileTime = view.creationTime();
-			fi.setCreated(new Date((view.creationTime().toMillis() / 1000) * 1000));
-			fi.setUpdated(new Date((view.lastModifiedTime().toMillis() / 1000) * 1000));
+			node.setCreated(new Date((view.creationTime().toMillis() / 1000) * 1000));
+			node.setUpdated(new Date((view.lastModifiedTime().toMillis() / 1000) * 1000));
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
-	
+
 	// #########################################################################
 	// ## Read / Write
 	// #########################################################################
-	
+
 	@Override
-	public boolean write(OV_FileInfo fi) {
-		log.info("write =" + fi.json());
-		File file = new File(homeDir + "/" + fi.getPath());
+	public OV_FileInfo write(OV_FileInfo node) {
+		log.info("write =" + node.json());
+		File file = new File(homeDir + "/" + node.getPath());
 		FileWriter writer = null;
 		try {
 			writer = new FileWriter(file, false); // append mode true
-			writer.write(fi.getText_in_file());
+			writer.write(node.getText_in_file());
 			writer.flush();
-		//	writeTime(fi);
-			{
-				//File file = new File(homeDir + "/" + fi.getPath());
+			// writeTime(fi);
+			{ // Adjust time
+				// File file = new File(homeDir + "/" + fi.getPath());
 				Path filePath = Paths.get(file.getAbsolutePath());
 				BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
-				FileTime created = FileTime.fromMillis(fi.getCreated().getTime());
-				FileTime updated = FileTime.fromMillis(fi.getUpdated().getTime());
+				FileTime created = FileTime.fromMillis(node.getCreated().getTime());
+				FileTime updated = FileTime.fromMillis(node.getUpdated().getTime());
 				attributes.setTimes(updated, updated, created); // lastModified, lastAccess, Created
 			}
 		} catch (IOException e) {
@@ -165,10 +168,8 @@ public class LocalFileScanner extends FileScanner {
 				e.printStackTrace();
 			}
 		}
-		return true;
+		return node;
 
 	}
-
- 
 
 }
