@@ -35,6 +35,7 @@ public class Sync {
 //	RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 
 	boolean lock = true;
+	boolean remote_lock = false;
 	LocalFileScanner local;
 	RemoteFileScanner remote;
 
@@ -42,7 +43,7 @@ public class Sync {
 	String host13F = "100.99.14.164:9292";
 	String hostFun25 = "211.239.124.246:19808";
 	String hostLocal = "192.168.25.50:9292";
-	
+
 	StringBuilder xx = new StringBuilder();
 
 	private void config_one() {
@@ -99,7 +100,7 @@ public class Sync {
 					log.info("--> not_exist = " + src.getFullPath());
 					dst = remoteWrite(src, dstParent.getScanner()); // create node
 					if (dst != null) {
-						srcParent.setChildChanaged(true);
+						srcParent.setChildChanged(true);
 						compareFile(src, dst);
 					} // recursive
 				} else {
@@ -107,10 +108,26 @@ public class Sync {
 					compareFile(src, dst); // recursive
 				}
 			}
-			if (srcParent.is_dir() && srcParent.isChildChanaged()) {
+			if (srcParent.is_dir() && srcParent.isChildChanged()) {
 				remoteWrite(srcParent, dstParent.getScanner()); // overwrite time
 			}
+			if (dstParent.is_dir() && dstParent.isChildChanged()) {
+			//	localUpdateTime(dstParent, srcParent.getScanner()); 
+			}
 		}
+	}
+
+	private OV_FileInfo find(OV_FileInfo t, LinkedList<OV_FileInfo> children) {
+		if (children != null) {
+			String name = t.getShortName();
+			for (OV_FileInfo c : children) {
+				if (name.equals(c.getShortName())) {
+					// System.out.println("find " + name + " c1=" + c.getShortName());
+					return c;
+				}
+			}
+		}
+		return null;
 	}
 
 	private void compareTime(OV_FileInfo src, OV_FileInfo dst) {
@@ -121,27 +138,37 @@ public class Sync {
 			if (diff < 0) {
 				report("--> " + src.getFullPath() + ", t=" + diff);
 				log.info("--> " + src.getFullPath() + ", t=" + diff);
-				if (!lock  ) {
-					remoteWrite(src, dst.getScanner());
-					src.getParent().setChildChanaged(true);
+				if (!remote_lock) {
+					OV_FileInfo a = remoteWrite(src, dst.getScanner());
+					if (a != null) {
+						src.getParent().setChildChanged(true);
+					}
 				}
 			} else {
 				report("<-- " + src.getFullPath() + ", t=" + diff);
-				if (!lock) {
-					// remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
-				}
+				remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
 			}
 		}
 	}
 
+	// ##################################################################
+	// ## Remote Sync
+	// ##################################################################
+
 	private void remoteGet(OV_FileInfo dst, FileScanner scanner) {
+		if (lock) {
+			return;
+		}
 		log.info("<< " + dst.getFullPath());
 		dst.read();
 		scanner.write(dst);
+		dst.getParent().setChildChanged(true);
 	}
 
 	private OV_FileInfo remoteWrite(OV_FileInfo src, FileScanner scanner) {
-		log.info(" -> " + src.getFullPath());
+		if (remote_lock) {
+			return null;
+		}
 		OV_FileInfo np = null;
 		if (src.is_dir()) {
 			src.read();
@@ -158,21 +185,8 @@ public class Sync {
 
 	}
 
-	private OV_FileInfo find(OV_FileInfo t, LinkedList<OV_FileInfo> children) {
-		if (children != null) {
-			String name = t.getShortName();
-			for (OV_FileInfo c : children) {
-				if (name.equals(c.getShortName())) {
-					// System.out.println("find " + name + " c1=" + c.getShortName());
-					return c;
-				}
-			}
-		}
-		return null;
-	}
-	
 	private void report(String msg) {
-		xx.append(msg+"\n");
+		xx.append(msg + "\n");
 	}
 
 	public static void main(String[] args) {
