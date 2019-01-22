@@ -79,7 +79,7 @@ public class TestFileRest {
 		System.out.println("############ Read Test");
 		OV_FileInfo fi = new OV_FileInfo();
 		try {
-			fi = scanner.readFile("first_foot.txt");
+			fi = scanner.httpGetRead("first_foot.txt");
 		} catch (URISyntaxException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

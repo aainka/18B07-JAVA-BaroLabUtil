@@ -4,8 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 public class BeanDate extends BeanType {
+
+	public BeanDate(BeanAttribute bAttr) {
+		this.bAttr = bAttr;
+	}
 
 	public static java.util.Date getValue(BeanAttribute atr, Object target) {
 		try {
@@ -23,16 +28,41 @@ public class BeanDate extends BeanType {
 	}
 
 	@Override
-	protected void writeExcelCell(BeanAttribute atr, Object recObject, Cell cell) {
-		try {
-			java.util.Date value = (Date) atr.getGetter().invoke(recObject, null);
-			cell.setCellValue(value);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+	public int compareValue(BeanAttribute atr, Object value0, Object value1) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
- 
+	@Override
+	public void writeXlsValue(Object targetObject, Cell cell)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+		java.util.Date value = (Date) bAttr.getGetter().invoke(targetObject, null);
+		cell.setCellValue(value);
+
+	}
+
+	@Override
+	public void readXlsValue(Object targetObject, Cell cell)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		CellType type = cell.getCellTypeEnum();
+		switch (type.getCode()) {
+		case 0: // numeric and date
+			Date v0 = cell.getDateCellValue();
+			bAttr.getSetter().invoke(targetObject, v0);
+			break;
+		case 1: // String
+			String value = cell.getStringCellValue();
+			bAttr.getSetter().invoke(targetObject, value);
+			// log.warning("value.string=" + value + sPos);
+			// + ", sheet=" + sheet.getSheetName());
+			break;
+		case 3: // BLANK
+			break;
+		default:
+			System.out.println("[ERROR] type = " + type + " name=" + bAttr.getName());
+		}
+
+	}
+
 }

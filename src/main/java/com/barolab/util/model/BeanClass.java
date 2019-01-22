@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -53,7 +55,7 @@ public class BeanClass {
 		int count = 0;
 		for (Field f : clazz.getDeclaredFields()) { // attribute name
 			BeanAttribute attr = new BeanAttribute();
-			attr.setClazz(clazz);
+			// attr.setClazz(clazz);
 			if (attr.init(this, f, count) != null) {
 				attrs.add(attr);
 				// System.out.println( "init.attr = " + f.getName()+ " "+count);
@@ -154,7 +156,13 @@ public class BeanClass {
 	// *****************************************************************************
 
 	public List<T> readExcel(String filename, String sheetname) {
-		return new ExcelObjectReader<T>().read(this, sheetname, filename);
+		try {
+			return new ExcelObjectReader<T>().read(this, sheetname, filename);
+		} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private transient XSSFWorkbook workbook = new XSSFWorkbook();
@@ -220,19 +228,19 @@ public class BeanClass {
 					if (value == null)
 						continue;
 					if (value.getClass() == float.class || value.getClass() == Float.class) {
-						attr.getBeanType().writeExcelCell(attr, recObject, cell);
+						attr.getBeanType().writeXlsValue(recObject, cell);
 						// cell.setCellValue((Float) value);
 					}
 					if (value.getClass() == int.class || value.getClass() == Integer.class) {
 						cell.setCellValue((Integer) value);
 					}
 					if (value.getClass() == String.class) {
-						attr.getBeanType().writeExcelCell(attr, recObject, cell);
+						attr.getBeanType().writeXlsValue(recObject, cell);
 						// cell.setCellValue((String) value);
 					}
 					if (value.getClass() == java.util.Date.class) {
 						cell.setCellStyle(cellStyleDate);
-						attr.getBeanType().writeExcelCell(attr, recObject, cell);
+						attr.getBeanType().writeXlsValue(recObject, cell);
 //						java.util.Date vDate = (Date) value;
 //						if (vDate != null) {
 //							cell.setCellValue(vDate);
@@ -310,10 +318,26 @@ public class BeanClass {
 
 	public static void setValue(Object target, String atrName, Object value) {
 		BeanClass bClass = BeanClass.getInstance(target.getClass());
-		if ( value != null ) {
-		bClass.getAttribute(atrName).setValue(target, value);
+		if (value != null) {
+			bClass.getAttribute(atrName).setValue(target, value);
 		}
 
+	}
+
+	public static BeanType createBeanType(String name, BeanAttribute bAttr) {
+		if ( name.equals("int")) {
+			return new BeanInt(bAttr);
+		}
+		if ( name.equals("float")) {
+			return new BeanFloat(bAttr);
+		}
+		if ( name.equals("java.lang.String")) {
+			return new BeanString(bAttr);
+		}
+		if ( name.equals("java.util.Date")) {
+			return new BeanDate(bAttr);
+		}
+		return null;
 	}
 
 }

@@ -82,7 +82,23 @@ public class RemoteFileScanner extends FileScanner {
 		return null;
 	}
 
-	public OV_FileInfo readFile(String path) throws Exception {
+	@Override
+	public void read(OV_FileInfo fi) {
+		// System.out.println("Remote: Read");
+		// String name = getName(fi);
+		OV_FileInfo a;
+		try {
+			a = httpGetRead(fi.getPath());
+			fi.copyFrom(a);
+			log.fine(a.json());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public OV_FileInfo httpGetRead(String path) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
 				.setParameter("home", homeDir) //
@@ -93,9 +109,10 @@ public class RemoteFileScanner extends FileScanner {
 		String s = getEntityString(response);
 		// System.out.println("body=" + s);
 		if (s != null) {
-			OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
+			OV_FileInfo node = gson.fromJson(s, OV_FileInfo.class);
+			log.finer(node.json());
 			// System.out.println(fileinfo.json());
-			return fileinfo;
+			return node;
 		}
 		return null;
 	}
@@ -189,21 +206,8 @@ public class RemoteFileScanner extends FileScanner {
 		}
 		return myfi;
 	}
+	
 
-	@Override
-	public void read(OV_FileInfo fi) {
-		// System.out.println("Remote: Read");
-		// String name = getName(fi);
-		OV_FileInfo a;
-		try {
-			a = readFile(fi.getPath());
-			fi.copyFrom(a);
-			System.out.println(a.json());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
+	
 
 }

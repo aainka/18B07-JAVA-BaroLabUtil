@@ -1,6 +1,5 @@
 package com.barolab.util;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +19,6 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.barolab.util.model.BeanAttribute;
-import com.barolab.util.model.BeanClass;
 
 public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 
@@ -36,7 +34,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 	private transient Sheet sheet;
 //	BeanClass beanClass = new BeanClass();
 
-	private void init_w() {
+	private void initStyle() {
 		{
 			cellStyleDate = workbook.createCellStyle();
 			CreationHelper createHelper = workbook.getCreationHelper();
@@ -78,6 +76,9 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		this.count = list.size();
 		beanClass.init(elementClass);
 
+		/*
+		 * verify data
+		 */
 		if (list.size() > 0) {
 			Class a = list.get(0).getClass();
 			if (!a.equals(elementClass)) {
@@ -90,7 +91,7 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 			sheetname = "Sheet1";
 		}
 		sheet = workbook.createSheet(sheetname);
-		init_w();
+		initStyle();
 
 		////////////////////////////////////////////
 		int rowIndex = 0;
@@ -151,16 +152,13 @@ public abstract class ExcelObjectWriter extends ExcelObjectDefault {
 		}
 
 		try {
-			FileOutputStream out = new FileOutputStream(new File(filename));
-			workbook.write(out);
-			out.close();
+			FileOutputStream outputStream = new FileOutputStream(filename);
+			workbook.write(outputStream);
+			workbook.close();
+			outputStream.close();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	}
-
-	public void debugf(String msg) {
-		System.out.println("Ex: " + msg);
 	}
 }

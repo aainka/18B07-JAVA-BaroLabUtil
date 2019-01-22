@@ -34,7 +34,7 @@ public class Sync {
 //
 //	RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 
-	boolean lock = true;
+	boolean lock = false;
 	boolean remote_lock = false;
 	LocalFileScanner local;
 	RemoteFileScanner remote;
@@ -58,6 +58,7 @@ public class Sync {
 	}
 
 	public void test() {
+		LogConfig.setLevel("com.barolab.sync.RemoteFileScanner", Level.ALL);
 		// syncProject("18B07-BaroLabUtil", hostLocal, "/root/project",
 		// "C:/@SWDevelopment/workspace-java");
 		syncProject("18B07-BaroLabUtil", hostLocal, "/root/project", "S:/sw-dev/eclipse-workspace-18b");
@@ -77,7 +78,7 @@ public class Sync {
 	}
 
 	public void sync() throws IOException {
-		LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+	
 		config_one();
 		OV_FileInfo a = local.scanAll();
 		OV_FileInfo b = remote.scanAll();
@@ -161,8 +162,8 @@ public class Sync {
 		}
 		log.info("<< " + dst.getFullPath());
 		dst.read();
-		scanner.write(dst);
-		dst.getParent().setChildChanged(true);
+ 		scanner.write(dst);
+//		dst.getParent().setChildChanged(true);
 	}
 
 	private OV_FileInfo remoteWrite(OV_FileInfo src, FileScanner scanner) {

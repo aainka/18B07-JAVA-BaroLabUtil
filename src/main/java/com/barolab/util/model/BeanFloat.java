@@ -3,10 +3,15 @@ package com.barolab.util.model;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 public class BeanFloat extends BeanType {
 
 	Class type = Float.class;
+
+	public BeanFloat(BeanAttribute bAttr) {
+		this.bAttr = bAttr;
+	}
 
 	public static Float getValue(BeanAttribute atr, Object target) {
 		try {
@@ -24,20 +29,38 @@ public class BeanFloat extends BeanType {
 	}
 
 	@Override
-	protected void writeExcelCell(BeanAttribute atr, Object recObject, Cell cell) {
-		try {
-			float value = (float) atr.getGetter().invoke(recObject, null);
-			cell.setCellValue(value);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Override
 	public int compareValue(BeanAttribute atr, Object value0, Object value1) {
 		float a = (float) value0;
 		float b = (float) value1;
-		return (int) ((int) a-b);
+		return (int) ((int) a - b);
+	}
+
+	@Override
+	public void writeXlsValue(Object targetObject, Cell cell)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		float value = (float) bAttr.getGetter().invoke(targetObject, null);
+		cell.setCellValue(value);
+	}
+
+	@Override
+	public void readXlsValue(Object targetObject, Cell cell)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		CellType type = cell.getCellTypeEnum();
+		switch (type.getCode()) {
+		case 0: // numeric and date
+			float v0 = (float) cell.getNumericCellValue();
+			bAttr.getSetter().invoke(targetObject, v0);
+		case 1: // String
+			String value = cell.getStringCellValue();
+			bAttr.getSetter().invoke(targetObject, value);
+			// log.warning("value.string=" + value + sPos);
+			// + ", sheet=" + sheet.getSheetName());
+			break;
+		case 3: // BLANK
+			break;
+		default:
+			System.out.println("[ERROR] type = " + type + " name=" + bAttr.getName());
+		}
+
 	}
 }

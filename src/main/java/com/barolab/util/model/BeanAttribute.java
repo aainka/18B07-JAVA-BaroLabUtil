@@ -12,10 +12,8 @@ import lombok.extern.java.Log;
 public class BeanAttribute {
 	private int index;
 	private String name;
-	private Class type;
 	public Method getter;
 	private Method setter;
-	private Class clazz;
 	private int xlsColIndex;
 	private BeanType beanType;
 	public BeanClass beanClass;
@@ -24,14 +22,14 @@ public class BeanAttribute {
 		this.beanClass = beanClass;
 		this.index = index;
 		name = f.getName();
-		type = f.getType();
+		// type = f.getType();
 		try {
 			String funcName = "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-			getter = clazz.getMethod(funcName, null);
+			getter = beanClass.getClazz().getMethod(funcName, null);
 			funcName = "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
 			Class[] argTypes = new Class[] { f.getType() };
-			setter = clazz.getMethod(funcName, argTypes);
-			beanType = TypeFactory.find(type.getName());
+			setter = beanClass.getClazz().getMethod(funcName, argTypes);
+			beanType = BeanClass.createBeanType(f.getType().getName(), this);
 		} catch (NoSuchMethodException | SecurityException e) {
 			// e.printStackTrace();
 			log.finer("BeanAttribute skip attribute = " + f.getName());
@@ -39,11 +37,11 @@ public class BeanAttribute {
 		}
 		return this;
 	}
-	
+
 	public String toString() {
-		return "bAtr["+name+", type="+beanType.getClass()+"] ";
+		return "bAtr[" + name + ", type=" + beanType.getClass() + "] ";
 	}
-	
+
 	public Object getValue(Object recObject) {
 		Object value = null;
 		try {
@@ -54,11 +52,11 @@ public class BeanAttribute {
 		}
 		return value;
 	}
-	
+
 	public void setValue(Object target, Object value) {
-		  try {
+		try {
 			setter.invoke(target, value);
-		//	System.out.println("setter = "+setter+"value= %d "+value);
+			// System.out.println("setter = "+setter+"value= %d "+value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
