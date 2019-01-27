@@ -14,11 +14,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import lombok.extern.java.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import lombok.extern.java.Log;
 
 @Log
 public class RemoteFileScanner extends FileScanner {
@@ -47,15 +48,19 @@ public class RemoteFileScanner extends FileScanner {
 		return root;
 	}
 
-	public void scan(OV_FileInfo node) throws Exception {
-		// System.out.println(node.getFullPath());
+	public void scan(OV_FileInfo node) {
 		if (node.is_dir()) {
-			List<OV_FileInfo> list = getDir(node.getPath());
-			for (OV_FileInfo child : list) {
-				if (!IgnoreFile.ignore(child.getFullPath(this))) {
-					node.add(child);
-					scan(child);
+			try {
+				List<OV_FileInfo> list = getDir(node.getPath());
+				for (OV_FileInfo child : list) {
+					if (!IgnoreFile.ignore(child.getFullPath(this))) {
+						node.add(child);
+						scan(child);
+					}
 				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
@@ -97,7 +102,7 @@ public class RemoteFileScanner extends FileScanner {
 		}
 
 	}
-	
+
 	public OV_FileInfo httpGetRead(String path) throws Exception {
 		URIBuilder builder = new URIBuilder();
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
@@ -121,7 +126,6 @@ public class RemoteFileScanner extends FileScanner {
 	 * Remote에 화일생성
 	 */
 	public OV_FileInfo write(OV_FileInfo finfo) {
-		log.info("httpWrite");
 		OV_FileInfo a = null;
 		try {
 			a = httpWrite(finfo);
@@ -129,7 +133,6 @@ public class RemoteFileScanner extends FileScanner {
 			e.printStackTrace();
 		}
 		return a;
-		
 	}
 
 	public OV_FileInfo httpWrite(OV_FileInfo finfo) throws Exception {
@@ -137,7 +140,7 @@ public class RemoteFileScanner extends FileScanner {
 		builder.setScheme("http").setHost(host).setPath("/api/V1/file") //
 				.setParameter("home", homeDir);
 		URI uri = builder.build();
-		log.info(uri.toString());
+		log.fine(uri.toString());
 		HttpPost request = new HttpPost(uri);
 		if (finfo != null) {
 			String json_string = gson.toJson(finfo);
@@ -150,10 +153,10 @@ public class RemoteFileScanner extends FileScanner {
 			if (s != null) {
 				OV_FileInfo fileinfo = gson.fromJson(s, OV_FileInfo.class);
 				// fileinfo.json();
-				log.info("OK="+s);
+				log.fine("OK=" + s);
 				return fileinfo;
 			}
-			
+
 		}
 //		EntityUtils.consumeQuietly(response.getEntity());
 		return null;
@@ -206,8 +209,5 @@ public class RemoteFileScanner extends FileScanner {
 		}
 		return myfi;
 	}
-	
-
-	
 
 }

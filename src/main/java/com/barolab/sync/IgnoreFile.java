@@ -1,13 +1,13 @@
 package com.barolab.sync;
 
 public class IgnoreFile {
-	
-	static String[] igset = {"/target",".class","/.","/__"};
+
+	static String[] igset = { "/target", ".class", "/.", "/__", ".out", "*.log", "*.zip", "*.ppt", "*.xls", ".pptx",
+			".xlsx" };
 
 	public static boolean ignore(String name) {
-		// TODO Auto-generated method stub
 		for (String match : igset) {
-			if ( name.indexOf(match)>=0) {
+			if (name.indexOf(match) >= 0) {
 				return true;
 			}
 		}

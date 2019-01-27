@@ -98,7 +98,7 @@ public class LocalFileScanner extends FileScanner {
 			BufferedReader br = null;
 			String msg = null;
 			try {
-				System.out.println("Local.read file=" + name);
+				// System.out.println("Local.read file=" + name);
 				br = new BufferedReader(new FileReader(name));
 				StringBuilder sb = new StringBuilder();
 				String line = br.readLine();
@@ -108,7 +108,6 @@ public class LocalFileScanner extends FileScanner {
 					line = br.readLine();
 				}
 				node.setText_in_file(sb.toString());
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
@@ -119,7 +118,7 @@ public class LocalFileScanner extends FileScanner {
 				}
 			}
 		}
-		log.info(node.json());
+		log.fine(node.json());
 	}
 
 	private void readTime(OV_FileInfo node) {

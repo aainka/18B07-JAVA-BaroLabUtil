@@ -11,8 +11,7 @@ import lombok.extern.java.Log;
 @Log
 public class Sync {
 
-//	String remote_homeDir = "/proj7/GITHUB/18B07-BaroLabUtil/";
-//	String local_path = "C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/";
+	// updated1234
 
 //	String remote_homeDir = "/proj7/GITHUB/18004-DashConsole/";
 //	String local_path = "C:/@SWDevelopment/workspace-java/18004-DashConsole/";
@@ -34,7 +33,8 @@ public class Sync {
 //
 //	RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 
-	boolean lock = false;
+	
+	boolean lock = true;
 	boolean remote_lock = false;
 	LocalFileScanner local;
 	RemoteFileScanner remote;
@@ -46,27 +46,32 @@ public class Sync {
 
 	StringBuilder xx = new StringBuilder();
 
+	
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
 		// S:\sw-dev\eclipse-workspace-18b
 		// local = new
 		// LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
 		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
-		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18B07-BaroLabUtil");
+		remote = new RemoteFileScanner(hostHomeOne, "/root/SynHub/18B07-BaroLabUtil");
 //		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18004-DashConsole");
 //		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18004-DashConsole");
 	}
 
+	
 	public void test() {
-		LogConfig.setLevel("com.barolab.sync.RemoteFileScanner", Level.ALL);
-		// syncProject("18B07-BaroLabUtil", hostLocal, "/root/project",
-		// "C:/@SWDevelopment/workspace-java");
-		syncProject("18B07-BaroLabUtil", hostLocal, "/root/project", "S:/sw-dev/eclipse-workspace-18b");
+		LogConfig.setLevel("com.barolab.sync", Level.INFO);
+	//	LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+		syncProject("18B07-BaroLabUtil", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
+		syncProject("19A01-PyRestfulApi", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
+		syncProject("18004-DashConsole", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
+		// syncProject("18B07-BaroLabUtil", hostHomeOne, "/root/project",
+		// "S:/sw-dev/eclipse-workspace-18b");
 	}
 
 	public void syncProject(String projName, String host, String remoteDir, String localDir) {
 		System.out.println("Project=" + projName);
-		LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+		xx = new StringBuilder();
 		local = new LocalFileScanner(localDir + "/" + projName);
 		remote = new RemoteFileScanner(host, remoteDir + "/" + projName);
 		// config_one();
@@ -77,8 +82,8 @@ public class Sync {
 		System.out.println(xx.toString());
 	}
 
-	public void sync() throws IOException {
-	
+	public void sync99() throws IOException {
+
 		config_one();
 		OV_FileInfo a = local.scanAll();
 		OV_FileInfo b = remote.scanAll();
@@ -93,30 +98,50 @@ public class Sync {
 	 * @param dstParent
 	 */
 	private void compareFile(OV_FileInfo srcParent, OV_FileInfo dstParent) {
+		log.config(srcParent.getFullPath());
 		if (srcParent.children != null) {
 			for (OV_FileInfo src : srcParent.children) {
 				OV_FileInfo dst = find(src, dstParent.children);
 				if (dst == null) {
-					report("--> not_exist = " + src.getFullPath());
-					log.info("--> not_exist = " + src.getFullPath());
+					report("--> X " + src.getFullPath());
 					dst = remoteWrite(src, dstParent.getScanner()); // create node
 					if (dst != null) {
 						srcParent.setChildChanged(true);
-						compareFile(src, dst);
 					} // recursive
 				} else {
-					compareTime(src, dst);
-					compareFile(src, dst); // recursive
+					  compareTime(src, dst);
 				}
+				compareContext(src,dst);
+				compareFile(src, dst); // recursive
 			}
 			if (srcParent.is_dir() && srcParent.isChildChanged()) {
 				remoteWrite(srcParent, dstParent.getScanner()); // overwrite time
 			}
 			if (dstParent.is_dir() && dstParent.isChildChanged()) {
-			//	localUpdateTime(dstParent, srcParent.getScanner()); 
+				// localUpdateTime(dstParent, srcParent.getScanner());
 			}
 		}
 	}
+
+	
+	private void compareContext(OV_FileInfo src, OV_FileInfo dst) {
+		if ( src.is_dir()) {
+			return;
+		}
+		src.read();
+		dst.read();
+		String src_context = src.getText_in_file();
+		String dst_context = dst.getText_in_file();
+	 	int diff = src_context.length()-dst_context.length();
+		if (  src_context.equals(dst_context)) {
+			
+		} else {
+			log.severe("*************** Context is different "+src.getFullPath());
+		}
+		
+		
+	}
+
 
 	private OV_FileInfo find(OV_FileInfo t, LinkedList<OV_FileInfo> children) {
 		if (children != null) {
@@ -162,7 +187,7 @@ public class Sync {
 		}
 		log.info("<< " + dst.getFullPath());
 		dst.read();
- 		scanner.write(dst);
+		scanner.write(dst);
 //		dst.getParent().setChildChanged(true);
 	}
 
@@ -187,6 +212,7 @@ public class Sync {
 	}
 
 	private void report(String msg) {
+		log.info(msg);
 		xx.append(msg + "\n");
 	}
 
