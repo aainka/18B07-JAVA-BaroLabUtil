@@ -30,22 +30,22 @@ public class ConcoleHandler extends Handler {
 		case 900: // warnning
 			sMeter = "[****E]";
 			break;
-		case 800: // config
+		case 800: // info
 			sMeter = "[*****]";
 			break;
-		case 700: // info
+		case 700: // config
 			sMeter = "  ***";
 			break;
-		case 500: // fine
+		case 2:
 			sMeter = "   **";
 			break;
-		case 400: // finer
+		case 1:
 			sMeter = "    *";
 			break;
 		default:
 			sMeter = "-----"+arg0.getLevel().intValue();
 		}
-		System.out.print(sMeter + ":" + name + "." + arg0.getSourceMethodName() + "():"    );
+		System.out.print(sMeter + ":" + name + "." + arg0.getSourceMethodName() + "():");
 		if (arg0.getMessage().indexOf("\n") >=0) {
 			String[] lines = arg0.getMessage().split("\n");
 			for (String line : lines) {

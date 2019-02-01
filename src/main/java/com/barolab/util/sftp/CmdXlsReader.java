@@ -6,7 +6,7 @@ import java.util.logging.Level;
 
 
 import com.barolab.log.LogConfig;
-import com.barolab.util.ExcelObjectReader;
+import com.barolab.util.ExcelUtils;
 
 import lombok.extern.java.Log;
 
@@ -16,7 +16,7 @@ public class CmdXlsReader {
 	public void test2() {
 		LogConfig.setLevel(this, Level.FINE);
 		log.info("reader");
-		List<OV_Cmd> nlist = (List<OV_Cmd>) new ExcelObjectReader().read(OV_Cmd.class, "test",
+		List<OV_Cmd> nlist = (List<OV_Cmd>) new ExcelUtils().read(OV_Cmd.class, "test",
 				"C:\\VDI_SHARE\\cmd.xlsx");
 		for ( OV_Cmd cmd : nlist) {
 			log.info(cmd.toString());

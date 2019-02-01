@@ -58,7 +58,7 @@ public class BeanAttribute {
 			setter.invoke(target, value);
 			// System.out.println("setter = "+setter+"value= %d "+value);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
+			log.info("Failed bAttr("+name+") <-"+value +" ("+value.getClass().getName()+")");
 			e.printStackTrace();
 		}
 	}

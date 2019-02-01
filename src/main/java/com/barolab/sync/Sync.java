@@ -1,6 +1,7 @@
 package com.barolab.sync;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.logging.Level;
 
@@ -33,9 +34,8 @@ public class Sync {
 //
 //	RemoteFileScanner remote = new RemoteFileScanner("192.168.25.50:9292", "/root/AAA/18B07-BaroLabUtil");
 
-	
-	boolean lock = true;
-	boolean remote_lock = false;
+	boolean syncGetLock = false;
+	boolean syncPutLock = true;
 	LocalFileScanner local;
 	RemoteFileScanner remote;
 
@@ -46,7 +46,6 @@ public class Sync {
 
 	StringBuilder xx = new StringBuilder();
 
-	
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
 		// S:\sw-dev\eclipse-workspace-18b
@@ -58,15 +57,26 @@ public class Sync {
 //		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18004-DashConsole");
 	}
 
-	
 	public void test() {
+		String host;
+		String localDir;
+		if (true) {
+			syncGetLock = true;
+			syncPutLock = true;
+			host = hostLocal;
+			localDir = "S:/sw-dev/eclipse-workspace-18b";
+		} else {
+			syncGetLock = true;
+			syncPutLock = false;
+			host = hostHomeOne;
+			localDir = "C:/@SWDevelopment/workspace-java";
+		}
 		LogConfig.setLevel("com.barolab.sync", Level.INFO);
-	//	LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
-		syncProject("18B07-BaroLabUtil", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
-		syncProject("19A01-PyRestfulApi", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
-		syncProject("18004-DashConsole", hostHomeOne, "/root/SynHub", "C:/@SWDevelopment/workspace-java");
-		// syncProject("18B07-BaroLabUtil", hostHomeOne, "/root/project",
-		// "S:/sw-dev/eclipse-workspace-18b");
+		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
+	 	syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
+	 	syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
+
 	}
 
 	public void syncProject(String projName, String host, String remoteDir, String localDir) {
@@ -98,6 +108,9 @@ public class Sync {
 	 * @param dstParent
 	 */
 	private void compareFile(OV_FileInfo srcParent, OV_FileInfo dstParent) {
+		if (dstParent == null) {
+			return; // when lock
+		}
 		log.config(srcParent.getFullPath());
 		if (srcParent.children != null) {
 			for (OV_FileInfo src : srcParent.children) {
@@ -109,9 +122,11 @@ public class Sync {
 						srcParent.setChildChanged(true);
 					} // recursive
 				} else {
-					  compareTime(src, dst);
+					if ( !isContextSame(src, dst)) {
+					compareTime(src, dst);
+					}
 				}
-				compareContext(src,dst);
+				// isContextSame(src, dst);
 				compareFile(src, dst); // recursive
 			}
 			if (srcParent.is_dir() && srcParent.isChildChanged()) {
@@ -123,25 +138,27 @@ public class Sync {
 		}
 	}
 
-	
-	private void compareContext(OV_FileInfo src, OV_FileInfo dst) {
-		if ( src.is_dir()) {
-			return;
+	private boolean isContextSame(OV_FileInfo src, OV_FileInfo dst) {
+		if (dst == null) {
+			return false; // remotewrite lock 시 null.
+		}
+		if (src.is_dir()) {
+			return true;
 		}
 		src.read();
 		dst.read();
 		String src_context = src.getText_in_file();
 		String dst_context = dst.getText_in_file();
-	 	int diff = src_context.length()-dst_context.length();
-		if (  src_context.equals(dst_context)) {
-			
+		int diff = src_context.length() - dst_context.length();
+		if (src_context.equals(dst_context)) {
+		//	log.severe("*************** Context is same " + src.getFullPath());
+			return true;
 		} else {
-			log.severe("*************** Context is different "+src.getFullPath());
+			log.severe("*************** Context is different " + src.getFullPath());
+			return false;
 		}
-		
-		
-	}
 
+	}
 
 	private OV_FileInfo find(OV_FileInfo t, LinkedList<OV_FileInfo> children) {
 		if (children != null) {
@@ -155,6 +172,11 @@ public class Sync {
 		}
 		return null;
 	}
+	
+	static public String strTime(java.util.Date date) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh_mm_ss");
+		return simpleDateFormat.format(date);
+	}
 
 	private void compareTime(OV_FileInfo src, OV_FileInfo dst) {
 		long s0 = src.getUpdated().getTime();
@@ -162,16 +184,16 @@ public class Sync {
 		long diff = d0 - s0;
 		if (diff != 0) {
 			if (diff < 0) {
-				report("--> " + src.getFullPath() + ", t=" + diff);
+				report("--> " + src.getFullPath() + ", t=" + src.getUpdated());
 				log.info("--> " + src.getFullPath() + ", t=" + diff);
-				if (!remote_lock) {
+				if (!syncPutLock) {
 					OV_FileInfo a = remoteWrite(src, dst.getScanner());
 					if (a != null) {
 						src.getParent().setChildChanged(true);
 					}
 				}
 			} else {
-				report("<-- " + src.getFullPath() + ", t=" + diff);
+				report("<-- " + src.getFullPath() + ", s=" + src.getUpdated()+" d="+dst.getUpdated());
 				remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
 			}
 		}
@@ -182,17 +204,19 @@ public class Sync {
 	// ##################################################################
 
 	private void remoteGet(OV_FileInfo dst, FileScanner scanner) {
-		if (lock) {
+		if (syncGetLock) {
 			return;
 		}
-		log.info("<< " + dst.getFullPath());
-		dst.read();
+		log.info("<< " + dst.getFullPath() + " dir?" + dst.is_dir());
+		if (!dst.is_dir()) {
+			dst.read();
+		}
 		scanner.write(dst);
 //		dst.getParent().setChildChanged(true);
 	}
 
 	private OV_FileInfo remoteWrite(OV_FileInfo src, FileScanner scanner) {
-		if (remote_lock) {
+		if (syncPutLock) {
 			return null;
 		}
 		OV_FileInfo np = null;
@@ -212,7 +236,7 @@ public class Sync {
 	}
 
 	private void report(String msg) {
-		log.info(msg);
+		// log.info(msg);
 		xx.append(msg + "\n");
 	}
 

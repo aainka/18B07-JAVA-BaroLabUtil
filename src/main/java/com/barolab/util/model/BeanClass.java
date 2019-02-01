@@ -25,7 +25,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.barolab.util.ExcelObjectReader;
+import com.barolab.util.ExcelUtils;
 import com.barolab.util.TableMap;
 
 import lombok.Data;
@@ -157,7 +157,7 @@ public class BeanClass {
 
 	public List<T> readExcel(String filename, String sheetname) {
 		try {
-			return new ExcelObjectReader<T>().read(this, sheetname, filename);
+			return new ExcelUtils<T>().read(this, sheetname, filename);
 		} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

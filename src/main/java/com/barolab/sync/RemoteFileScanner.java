@@ -112,7 +112,7 @@ public class RemoteFileScanner extends FileScanner {
 		HttpGet request = new HttpGet(uri);
 		HttpResponse response = httpclient.execute(request);
 		String s = getEntityString(response);
-		// System.out.println("body=" + s);
+		log.finer("httpGetRead.body = " + s);
 		if (s != null) {
 			OV_FileInfo node = gson.fromJson(s, OV_FileInfo.class);
 			log.finer(node.json());

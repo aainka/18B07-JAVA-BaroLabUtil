@@ -141,31 +141,42 @@ public class LocalFileScanner extends FileScanner {
 
 	@Override
 	public OV_FileInfo write(OV_FileInfo node) {
+		String fileName = homeDir + "/" + node.getPath();
+		File file = new File(fileName);
 		log.info("write =" + node.json());
-		File file = new File(homeDir + "/" + node.getPath());
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter(file, false); // append mode true
-			writer.write(node.getText_in_file());
-			writer.flush();
-			// writeTime(fi);
-			{ // Adjust time
-				// File file = new File(homeDir + "/" + fi.getPath());
-				Path filePath = Paths.get(file.getAbsolutePath());
-				BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
-				FileTime created = FileTime.fromMillis(node.getCreated().getTime());
-				FileTime updated = FileTime.fromMillis(node.getUpdated().getTime());
-				attributes.setTimes(updated, updated, created); // lastModified, lastAccess, Created
+		if (node.is_dir()) {
+			if (!file.exists()) {
+				file.mkdirs();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+		} else {
+			FileWriter writer = null;
 			try {
-				if (writer != null)
-					writer.close();
+				writer = new FileWriter(file, false); // append mode true
+				writer.write(node.getText_in_file());
+				writer.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					if (writer != null)
+						writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
+		}
+		{ // Adjust time
+			// File file = new File(homeDir + "/" + fi.getPath());
+			Path filePath = Paths.get(file.getAbsolutePath());
+			BasicFileAttributeView attributes = Files.getFileAttributeView(filePath, BasicFileAttributeView.class);
+			FileTime created = FileTime.fromMillis(node.getCreated().getTime());
+			FileTime updated = FileTime.fromMillis(node.getUpdated().getTime());
+			try {
+				attributes.setTimes(updated, updated, created);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // lastModified, lastAccess, Created
 		}
 		return node;
 

@@ -32,14 +32,16 @@ public class BeanDate extends BeanType {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	// ########################################################
+	// ## XLS
+	// ########################################################
 
 	@Override
 	public void writeXlsValue(Object targetObject, Cell cell)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-
 		java.util.Date value = (Date) bAttr.getGetter().invoke(targetObject, null);
 		cell.setCellValue(value);
-
 	}
 
 	@Override
