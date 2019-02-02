@@ -3,56 +3,71 @@ package com.barolab.sync;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextPane;
+import javax.swing.table.DefaultTableModel;
+
+import com.barolab.gui.JYFrame;
+import com.barolab.gui.JYPanel;
 
 public class SyncGui {
 
 	public void build() {
-		JFrame frame = new JFrame("2019 SynGui / SmartBuilder");
+		JYFrame frame = new JYFrame("2019 SynGui / SmartBuilder");
+		JYPanel pan = frame.addPane("left", BorderLayout.CENTER);
+		 frame.addPane("right", BorderLayout.EAST);
 		{
-			JPanel leftPanel = new JPanel();
-			{
-				leftPanel.setPreferredSize(new Dimension(300, 500));
-				JTable jt = new JTable();
-				JScrollPane js = new JScrollPane(jt);
-				leftPanel.setLayout(new BorderLayout());
-				leftPanel.add(js);
-			}
-			JTabbedPane rightTab = null;
-			{
-				rightTab = new JTabbedPane();
-				JTextPane b = new JTextPane();
-				b.setPreferredSize(new Dimension(200, 200));
-				b.setText("bbbbb");
-				rightTab.addTab("aaa", b);
-				rightTab.addTab("bb", b);
-				rightTab.addTab("cc", b);
-				rightTab.addTab("dd", b);
-			}
-			frame.setSize(600, 600);
-			frame.getContentPane().setLayout(new BorderLayout());
-			frame.getContentPane().add(BorderLayout.WEST, leftPanel);
-			frame.getContentPane().add(BorderLayout.CENTER, rightTab);
-			frame.show(true);
+			pan.addTableView("syncTable");
 		}
-		
-		
-		JPanel x = new JPanel();
-		x.setLayout(new BorderLayout());
-		
+//		{
+//			JPanel leftPanel = new JPanel();
+//			leftPanel.setPreferredSize(new Dimension(700, 500));
+//			leftPanel.setLayout(new BorderLayout());
+//			{
+//				leftPanel.add(new JLabel("sync list"), BorderLayout.NORTH);
+//
+//			
+//				leftPanel.add(JYTable.create("syncTable"), BorderLayout.CENTER);
+//
+//				JPanel pan = new JPanel();
+//				pan.setLayout(new FlowLayout());
+//				pan.add(new JButton("set"));
+//
+//				leftPanel.add(pan, BorderLayout.SOUTH);
+//			}
+//			JTabbedPane rightTab = null;
+//			{
+//				rightTab = new JTabbedPane();
+//				addTabPanel("aaa", rightTab);
+//				addTabPanel("bbb", rightTab);
+//				addTabPanel("ccc", rightTab);
+//			}
 
-		JTextPane a = new JTextPane();
+//			
+//			
+//		}
+	}
 
-		a.setText("aaaaa");
-	
+	public void addTabPanel(String name, JTabbedPane tabbedPane) {
+		JTextPane b = new JTextPane();
+		b.setPreferredSize(new Dimension(200, 200));
+		b.setText(name + "..." + name);
+		tabbedPane.addTab(name, b);
+	}
 
-		// Frame().add(Panel("ComparePanel").add(TextEditor("LEFT"),
-		// TextEditor("RIGHT"));
+	public void tableSelected() {
+		// tableModel에서 데이타를 축출하여
+		// tabPane의 TextEditor로 전달한다.
+	}
+
+	// DATA Area
+
+	public DefaultTableModel getTableModel() {
+		Sync sn = new Sync();
+		return sn.getTableModel();
+//		String[] title = { "s1", "s2", "s3" };
+//		Object[][] contents = { { "a", "b", "c" } };
+//		return new DefaultTableModel(contents, title);
 	}
 
 	public static void main(String[] args) {

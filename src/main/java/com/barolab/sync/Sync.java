@@ -1,9 +1,11 @@
 package com.barolab.sync;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
+
+import javax.swing.table.DefaultTableModel;
 
 import com.barolab.log.LogConfig;
 
@@ -45,6 +47,7 @@ public class Sync {
 	String hostLocal = "192.168.25.50:9292";
 
 	StringBuilder xx = new StringBuilder();
+	List<OV_ScanRpt> scanList = null;
 
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
@@ -57,25 +60,58 @@ public class Sync {
 //		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18004-DashConsole");
 	}
 
-	public void test() {
+	public DefaultTableModel getTableModel() {
+		System.out.println("testGui.... Called");
+		scanList = new LinkedList<OV_ScanRpt>();
 		String host;
 		String localDir;
-		if (true) {
+		if (false) {
 			syncGetLock = true;
 			syncPutLock = true;
 			host = hostLocal;
 			localDir = "S:/sw-dev/eclipse-workspace-18b";
 		} else {
 			syncGetLock = true;
-			syncPutLock = false;
+			syncPutLock = true;
 			host = hostHomeOne;
 			localDir = "C:/@SWDevelopment/workspace-java";
 		}
 		LogConfig.setLevel("com.barolab.sync", Level.INFO);
 		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
 		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
-	 	syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
-	 	syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
+//		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
+//		syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
+
+		String[] columnName = { "File", "Mode", "Date" };
+		DefaultTableModel model = new DefaultTableModel(columnName, 0);
+
+		for (OV_ScanRpt trace : scanList) {
+			Object[] objList = new Object[] { trace.getSrc().getPath(), trace.getOp(), trace.getSrc().getUpdated() };
+			model.addRow(objList);
+		}
+		JYWidget.find("syncTalbe").setData(model);
+		return model;
+	}
+
+	public void test() {
+		String host;
+		String localDir;
+		if (false) {
+			syncGetLock = true;
+			syncPutLock = true;
+			host = hostLocal;
+			localDir = "S:/sw-dev/eclipse-workspace-18b";
+		} else {
+			syncGetLock = true;
+			syncPutLock = true;
+			host = hostHomeOne;
+			localDir = "C:/@SWDevelopment/workspace-java";
+		}
+		LogConfig.setLevel("com.barolab.sync", Level.INFO);
+		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
+		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
+		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
+		syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
 
 	}
 
@@ -117,13 +153,16 @@ public class Sync {
 				OV_FileInfo dst = find(src, dstParent.children);
 				if (dst == null) {
 					report("--> X " + src.getFullPath());
+					{
+						  OV_ScanRpt.create("remoteCreate",scanList,src,dst);
+					}
 					dst = remoteWrite(src, dstParent.getScanner()); // create node
 					if (dst != null) {
 						srcParent.setChildChanged(true);
 					} // recursive
 				} else {
-					if ( !isContextSame(src, dst)) {
-					compareTime(src, dst);
+					if (!isContextSame(src, dst)) {
+						compareTime(src, dst);
 					}
 				}
 				// isContextSame(src, dst);
@@ -151,7 +190,7 @@ public class Sync {
 		String dst_context = dst.getText_in_file();
 		int diff = src_context.length() - dst_context.length();
 		if (src_context.equals(dst_context)) {
-		//	log.severe("*************** Context is same " + src.getFullPath());
+			// log.severe("*************** Context is same " + src.getFullPath());
 			return true;
 		} else {
 			log.severe("*************** Context is different " + src.getFullPath());
@@ -172,11 +211,6 @@ public class Sync {
 		}
 		return null;
 	}
-	
-	static public String strTime(java.util.Date date) {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-hh_mm_ss");
-		return simpleDateFormat.format(date);
-	}
 
 	private void compareTime(OV_FileInfo src, OV_FileInfo dst) {
 		long s0 = src.getUpdated().getTime();
@@ -185,6 +219,9 @@ public class Sync {
 		if (diff != 0) {
 			if (diff < 0) {
 				report("--> " + src.getFullPath() + ", t=" + src.getUpdated());
+				{
+					  OV_ScanRpt.create("put",scanList,src,dst);
+				}
 				log.info("--> " + src.getFullPath() + ", t=" + diff);
 				if (!syncPutLock) {
 					OV_FileInfo a = remoteWrite(src, dst.getScanner());
@@ -193,7 +230,10 @@ public class Sync {
 					}
 				}
 			} else {
-				report("<-- " + src.getFullPath() + ", s=" + src.getUpdated()+" d="+dst.getUpdated());
+				report("<-- " + src.getFullPath() + ", s=" + src.getUpdated() + " d=" + dst.getUpdated());
+				{
+					  OV_ScanRpt.create("Get",scanList,src,dst);
+				}
 				remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
 			}
 		}
@@ -238,9 +278,12 @@ public class Sync {
 	private void report(String msg) {
 		// log.info(msg);
 		xx.append(msg + "\n");
+//		OV_ScanRpt nr = new OV_ScanRpt();
+//		nr.setOp(msg);
+//		scanList.add(nr);
 	}
 
-	public static void main(String[] args) {
+	public static void main9(String[] args) {
 		new Sync().test();
 
 	}
