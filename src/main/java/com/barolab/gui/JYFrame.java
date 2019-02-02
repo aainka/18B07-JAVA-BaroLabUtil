@@ -1,12 +1,11 @@
 package com.barolab.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 public class JYFrame {
 
@@ -28,15 +27,19 @@ public class JYFrame {
 //		if (frameSize.width > screenSize.width) {
 //			frameSize.width = screenSize.width;
 //		}
-		frame.setLocation(screenSize.width / 2 - (int)frameSize.getWidth() / 2, screenSize.height / 2 - (int)frameSize.getHeight() / 2);
+		frame.setLocation(screenSize.width / 2 - (int) frameSize.getWidth() / 2,
+				screenSize.height / 2 - (int) frameSize.getHeight() / 2);
 		frame.setResizable(true);
 		frame.setVisible(true);
 	}
 
 	public JYPanel addPane(String name, String position) {
-		JYPanel join = new JYPanel();
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(join.panel, position);
+		JYPanel join = new JYPanel("xx");
+		Container upper = frame.getContentPane();
+		if (upper.getLayout() == null) {
+			upper.setLayout(new BorderLayout());
+		}
+		upper.add(join.panel, position);
 		join.init(name);
 		frame.pack();
 		return join;

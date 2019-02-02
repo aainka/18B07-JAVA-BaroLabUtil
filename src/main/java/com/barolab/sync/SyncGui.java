@@ -9,15 +9,26 @@ import javax.swing.table.DefaultTableModel;
 
 import com.barolab.gui.JYFrame;
 import com.barolab.gui.JYPanel;
+import com.barolab.gui.JYTable;
+import com.barolab.gui.Widget;
 
 public class SyncGui {
 
 	public void build() {
 		JYFrame frame = new JYFrame("2019 SynGui / SmartBuilder");
-		JYPanel pan = frame.addPane("left", BorderLayout.CENTER);
-		 frame.addPane("right", BorderLayout.EAST);
+		JYPanel pan = frame.addPane("SyncTablePanel", BorderLayout.WEST);
 		{
-			pan.addTableView("syncTable");
+			pan.add(new JYTable("table"), BorderLayout.CENTER);
+			Widget box = pan.add(new JYPanel("ControlButton").setSize(100, 100), BorderLayout.SOUTH);
+			box.add(new JYButton("xxx"),null);
+		}
+		JYPanel pan2 = frame.addPane("EditorTabbed", BorderLayout.CENTER);
+		{
+			Widget tpan = pan2.add(new JYTabbedPane("aa"), BorderLayout.CENTER);
+			tpan.add(new JYPanel("aaa"),null);
+			tpan.add(new JYPanel("aa1"),null);
+			tpan.add(new JYPanel("aa2"),null);
+			tpan.add(new JYPanel("aa3"),null);
 		}
 //		{
 //			JPanel leftPanel = new JPanel();
@@ -48,12 +59,7 @@ public class SyncGui {
 //		}
 	}
 
-	public void addTabPanel(String name, JTabbedPane tabbedPane) {
-		JTextPane b = new JTextPane();
-		b.setPreferredSize(new Dimension(200, 200));
-		b.setText(name + "..." + name);
-		tabbedPane.addTab(name, b);
-	}
+
 
 	public void tableSelected() {
 		// tableModel에서 데이타를 축출하여

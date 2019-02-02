@@ -9,16 +9,35 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
-public class JYTable {
+public class JYTable extends Widget {
 
 	private JTable table = new JTable();
 	JScrollPane jscrollPane = new JScrollPane(table);
 	DefaultTableModel model = new DefaultTableModel();
 
-	public static Component create(String string) {
-		// TODO Auto-generated method stub
-		return new JYTable().jscrollPane;
+	public JYTable(String name) {
+		super(name);
+		Vector<String> bb = new Vector<String>();
+		bb.add("aa");
+		bb.add("bb");
+		bb.add("cc");
+	 	model.setColumnIdentifiers(bb);
+	 	table.setModel(model);
 	}
+	
+	@Override
+	public Component getContent() {
+		// TODO Auto-generated method stub
+		return jscrollPane;
+	}
+	
+	@Override
+	public Widget add(Widget child, String constraints) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	
 	public void build(final JYController controller) {
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -32,10 +51,18 @@ public class JYTable {
 				controller.event(param);
 			} 
 		});
-		Vector<String> bb = new Vector<String>();
-		bb.add("aa");
-	 	model.setColumnIdentifiers(bb);
+	
 	}
+
+ 
+	public void init(String name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
 
 
 
