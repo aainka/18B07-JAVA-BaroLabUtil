@@ -1,12 +1,12 @@
-package com.barolab.sync;
+package com.barolab.gui;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
-
-import com.barolab.gui.Widget;
 
 public class JYTabbedPane extends Widget {
 
@@ -15,28 +15,10 @@ public class JYTabbedPane extends Widget {
 	public JYTabbedPane(String name) {
 		super(name);
 	}
-	
+
 	@Override
-	public Component getContent() {
+	public Container getComponent() {
 		return tpan;
-	}
-
-	@Override
-	public Widget add(Widget child, String constraints) {
-		tpan.addTab(child.getName(),child.getContent());
-		return null;
-	}
-
-	
-	public void init(String name) {
-		
-//		JTabbedPane rightTab = null;
-//		{
-//			rightTab = new JTabbedPane();
-//			addTabPanel("aaa", rightTab);
-//			addTabPanel("bbb", rightTab);
-//			addTabPanel("ccc", rightTab);
-//		}
 	}
 
 	public void addTabPanel(String name, JTabbedPane tabbedPane) {
@@ -45,6 +27,18 @@ public class JYTabbedPane extends Widget {
 		b.setText(name + "..." + name);
 		tabbedPane.addTab(name, b);
 	}
+
+	@Override
+	public Widget setUpper(Widget upper, String constraints) {
+		Component parent = upper.getComponent();
+		if (parent instanceof JPanel) {
+			((JPanel) parent).add(tpan, constraints);
+		}
+		return this;
+	}
+
+
+
 
 
 }

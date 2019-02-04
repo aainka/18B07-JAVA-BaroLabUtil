@@ -7,17 +7,17 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
-public class JYFrame {
+public class JYFrame extends Widget {
 
 	JFrame frame = new JFrame();
 
-	public JYFrame(String title) {
-		frame.setTitle(title);
-		frame.setPreferredSize(new Dimension(1000, 600));
+	public JYFrame(String name) {
+		super(name);
+		frame.setTitle(name);
+		frame.setPreferredSize(new Dimension(1500, 900));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.getContentPane().setLayout(new BorderLayout());
-//		frame.getContentPane().add(leftPanel, BorderLayout.WEST);
-//		frame.getContentPane().add(rightTab, BorderLayout.CENTER);
+		frame.setLayout(new BorderLayout());
+		frame.getContentPane().setLayout(new BorderLayout());
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = frame.getPreferredSize();
@@ -30,19 +30,26 @@ public class JYFrame {
 		frame.setLocation(screenSize.width / 2 - (int) frameSize.getWidth() / 2,
 				screenSize.height / 2 - (int) frameSize.getHeight() / 2);
 		frame.setResizable(true);
+		frame.pack();
 		frame.setVisible(true);
 	}
-
-	public JYPanel addPane(String name, String position) {
-		JYPanel join = new JYPanel("xx");
-		Container upper = frame.getContentPane();
-		if (upper.getLayout() == null) {
-			upper.setLayout(new BorderLayout());
-		}
-		upper.add(join.panel, position);
-		join.init(name);
-		frame.pack();
-		return join;
+	@Override
+	public Container getComponent() {
+		return frame.getContentPane();
 	}
+	
+	public Widget size(int width, int height) {
+		frame.setPreferredSize(new Dimension(width, height));
+		frame.pack();
+		return this;
+	}
+	
+	@Override
+	public Widget setUpper(Widget upper, String constraints) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 }

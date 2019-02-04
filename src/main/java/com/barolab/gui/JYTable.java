@@ -1,8 +1,11 @@
 package com.barolab.gui;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.util.Vector;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
@@ -11,8 +14,8 @@ import javax.swing.table.DefaultTableModel;
 
 public class JYTable extends Widget {
 
-	private JTable table = new JTable();
-	JScrollPane jscrollPane = new JScrollPane(table);
+	public JTable jtable = new JTable();
+	JScrollPane jscrollPane = new JScrollPane(jtable);
 	DefaultTableModel model = new DefaultTableModel();
 
 	public JYTable(String name) {
@@ -21,49 +24,44 @@ public class JYTable extends Widget {
 		bb.add("aa");
 		bb.add("bb");
 		bb.add("cc");
-	 	model.setColumnIdentifiers(bb);
-	 	table.setModel(model);
-	}
-	
-	@Override
-	public Component getContent() {
-		// TODO Auto-generated method stub
-		return jscrollPane;
-	}
-	
-	@Override
-	public Widget add(Widget child, String constraints) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		model.setColumnIdentifiers(bb);
+		jtable.setModel(model);
 
-
-	
-	public void build(final JYController controller) {
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		jtable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent arg0) {
-				JYParam param = new JYParam();
-				param.put("source",this);
-				param.put("event","tableSelected");
-				param.put("rowNum",table.getSelectedRow());
-				param.put("colNum",table.getSelectedColumn());
-				controller.event(param);
-			} 
+				if (arg0.getValueIsAdjusting()) {
+					return;
+				}
+				System.out.println("valueChanged."+arg0.getFirstIndex());
+				new JYParam(source) //
+						.add("event", "tableSelected") //
+						.add("rowNum", jtable.getSelectedRow()) //
+						.add("colNum", jtable.getSelectedColumn()) //
+						.send();
+				// new JYParam(source).add("source", source).add("action", getName()).send();
+			}
 		});
-	
 	}
 
- 
-	public void init(String name) {
-		// TODO Auto-generated method stub
-		
+	@Override
+	public Container getComponent() {
+		return jscrollPane;
+	}
+
+	@Override
+	public Widget setUpper(Widget upper, String constraints) {
+		Component parent = upper.getComponent();
+		if (parent instanceof JPanel) {
+			((JPanel) parent).add(jscrollPane, constraints);
+		}
+		return this;
 	}
 
 
 
+	public void build(final JYController controller) {
 
-
-
+	}
 
 }

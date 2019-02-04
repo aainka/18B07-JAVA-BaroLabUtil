@@ -47,7 +47,7 @@ public class Sync {
 	String hostLocal = "192.168.25.50:9292";
 
 	StringBuilder xx = new StringBuilder();
-	List<OV_ScanRpt> scanList = null;
+ 	List<OV_ScanRpt> scanList = null;
 
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
@@ -65,7 +65,7 @@ public class Sync {
 		scanList = new LinkedList<OV_ScanRpt>();
 		String host;
 		String localDir;
-		if (false) {
+		if (true) {
 			syncGetLock = true;
 			syncPutLock = true;
 			host = hostLocal;
@@ -89,14 +89,14 @@ public class Sync {
 			Object[] objList = new Object[] { trace.getSrc().getPath(), trace.getOp(), trace.getSrc().getUpdated() };
 			model.addRow(objList);
 		}
-		JYWidget.find("syncTalbe").setData(model);
+		// JYWidget.find("syncTalbe").setData(model);
 		return model;
 	}
 
 	public void test() {
 		String host;
 		String localDir;
-		if (false) {
+		if (true) {
 			syncGetLock = true;
 			syncPutLock = true;
 			host = hostLocal;
@@ -110,8 +110,8 @@ public class Sync {
 		LogConfig.setLevel("com.barolab.sync", Level.INFO);
 		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
 		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
-		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
-		syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
+//		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
+//		syncProject("18004-DashConsole", host, "/root/SynHub", localDir);
 
 	}
 

@@ -1,8 +1,17 @@
 package com.barolab.sync;
 
-public class FileApi {
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-	public void readBinary() {
+public class FileApi {
+	
+	String filename;
+
+	public void readBinary() throws IOException {
 		  byte[] b = new byte[1024];
 		    int len; // 실제로 읽어온 길이 (바이트 개수)
 		    int counter = 0;
@@ -23,7 +32,7 @@ public class FileApi {
 		    System.out.println(); // 줄 바꾸고 종료
 	}
 	
-	public void wrtieBinary() {
+	public void wrtieBinary() throws IOException {
 		   DataOutputStream out = new DataOutputStream(new FileOutputStream(filename));
 
 		    // byte 배열이 아닌 정수 배열이어야, byte 데이터가 제대로 입력됨
