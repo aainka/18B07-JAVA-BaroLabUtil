@@ -60,6 +60,11 @@ public abstract class Widget {
 		list.add(child);
 		return child;
 	}
+	
+	final public Widget add(Object ... objects ) {
+		 
+		return null;
+	}
 
 	// ##############################################
 	// ## Widget Binding
@@ -77,6 +82,8 @@ public abstract class Widget {
 			System.out.println("CANT FOUND CONTROLLER!!!");
 		}
 	}
+
+ 
 	
 	
 

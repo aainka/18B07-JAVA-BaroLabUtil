@@ -26,6 +26,9 @@ public class JYTable extends Widget {
 		bb.add("cc");
 		model.setColumnIdentifiers(bb);
 		jtable.setModel(model);
+	//	jtable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+	//	jtable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		jtable.setAutoCreateColumnsFromModel(false);
 
 		jtable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -62,6 +65,15 @@ public class JYTable extends Widget {
 
 	public void build(final JYController controller) {
 
+	}
+
+	public Widget columnWidths(int[] widths) {
+		int index =0;
+		for ( int width : widths) {
+			jtable.getColumnModel().getColumn(index++).setPreferredWidth(width);
+		}
+		// TODO Auto-generated method stub
+		return this;
 	}
 
 }

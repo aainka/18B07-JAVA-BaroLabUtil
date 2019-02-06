@@ -1,0 +1,14 @@
+{
+	"widget": "Frame/top/korean",
+	"center": {
+		"widget": "Panel/TableView",
+		"west": {
+			"widget": "Panel/TableView",
+			"size": "100,100"
+		},
+		"left": {
+			"widget": "Panel/TableView"
+		}
+	},
+	"right": "Panel/kinm"
+}

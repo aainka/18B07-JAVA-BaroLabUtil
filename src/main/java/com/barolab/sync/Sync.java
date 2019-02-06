@@ -47,7 +47,7 @@ public class Sync {
 	String hostLocal = "192.168.25.50:9292";
 
 	StringBuilder xx = new StringBuilder();
- 	List<OV_ScanRpt> scanList = null;
+	List<OV_ScanRpt> scanList = null;
 
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
@@ -154,12 +154,14 @@ public class Sync {
 				if (dst == null) {
 					report("--> X " + src.getFullPath());
 					{
-						  OV_ScanRpt.create("remoteCreate",scanList,src,dst);
+						OV_ScanRpt scanRpt = OV_ScanRpt.create("Remote Create", scanList, src, dst);
+						if (!syncPutLock) {
+							dst = scanRpt.remotePut();
+							if (dst != null) {
+								srcParent.setChildChanged(true); // @Bug
+							} // recursive
+						}
 					}
-					dst = remoteWrite(src, dstParent.getScanner()); // create node
-					if (dst != null) {
-						srcParent.setChildChanged(true);
-					} // recursive
 				} else {
 					if (!isContextSame(src, dst)) {
 						compareTime(src, dst);
@@ -169,7 +171,9 @@ public class Sync {
 				compareFile(src, dst); // recursive
 			}
 			if (srcParent.is_dir() && srcParent.isChildChanged()) {
-				remoteWrite(srcParent, dstParent.getScanner()); // overwrite time
+				OV_ScanRpt scanRpt = OV_ScanRpt.create("Dir Update", scanList, srcParent, dstParent);
+				// remotePut(srcParent, dstParent.getScanner()); // overwrite time
+				scanRpt.remotePut();
 			}
 			if (dstParent.is_dir() && dstParent.isChildChanged()) {
 				// localUpdateTime(dstParent, srcParent.getScanner());
@@ -219,20 +223,20 @@ public class Sync {
 		if (diff != 0) {
 			if (diff < 0) {
 				report("--> " + src.getFullPath() + ", t=" + src.getUpdated());
-				{
-					  OV_ScanRpt.create("put",scanList,src,dst);
-				}
 				log.info("--> " + src.getFullPath() + ", t=" + diff);
-				if (!syncPutLock) {
-					OV_FileInfo a = remoteWrite(src, dst.getScanner());
-					if (a != null) {
-						src.getParent().setChildChanged(true);
+				{
+					OV_ScanRpt scanRpt = OV_ScanRpt.create("Remote Put", scanList, src, dst);
+					if (!syncPutLock) {
+						dst = scanRpt.remotePut();
+						if (dst != null) {
+							src.getParent().setChildChanged(true); // @Bug
+						} // recursive
 					}
 				}
 			} else {
 				report("<-- " + src.getFullPath() + ", s=" + src.getUpdated() + " d=" + dst.getUpdated());
 				{
-					  OV_ScanRpt.create("Get",scanList,src,dst);
+					OV_ScanRpt.create("Get", scanList, src, dst);
 				}
 				remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
 			}
@@ -255,23 +259,12 @@ public class Sync {
 //		dst.getParent().setChildChanged(true);
 	}
 
-	private OV_FileInfo remoteWrite(OV_FileInfo src, FileScanner scanner) {
-		if (syncPutLock) {
-			return null;
+	public void RemotePutGUI(int[] rownums) {
+		for (int rownum : rownums) {
+			OV_ScanRpt rpt = scanList.get(rownum);
+			System.out.println("rpt = "+rpt.getSrc().getFullPath());
+			  rpt.remotePut();
 		}
-		OV_FileInfo np = null;
-		if (src.is_dir()) {
-			src.read();
-			np = scanner.write(src);
-		} else {
-			src.read();
-			// System.out.println("SRC.READ=" + src.json());
-			np = scanner.write(src); // @Todo cron to dst
-		}
-		if (np != null) {
-			np.setScanner(scanner);
-		}
-		return np;
 
 	}
 
