@@ -29,16 +29,12 @@ public class OV_FileInfo {
 			this.parent = parent;
 			this.parent.children.add(this);
 			this.scanner = this.parent.getScanner();
-		}
-		File fp = new File(this.getFullPath());
-		if (fp.isDirectory()) {
-			is_dir = true;
+			File fp = new File(this.getFullPath());
+			if (fp.isDirectory()) {
+				is_dir = true;
+			}
 		}
 	}
-
-//	public OV_FileInfo() {
-//		// TODO Auto-generated constructor stub
-//	}
 
 	// #################################################################
 	// ## Naming
@@ -49,7 +45,7 @@ public class OV_FileInfo {
 	}
 
 	public String getFullPath() {
-		if (path == null || path.length() <= 0) {
+		if (path == null || path.length() <= 0 ) {
 			return scanner.homeDir;
 		} else {
 			return scanner.homeDir + "/" + path;

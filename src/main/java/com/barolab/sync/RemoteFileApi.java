@@ -24,7 +24,6 @@ import lombok.extern.java.Log;
 @Log
 public class RemoteFileApi extends FileScanner {
 
-//	TestFileRest httpApi = null;
 	HttpClient httpclient = new DefaultHttpClient();
 	Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
@@ -36,17 +35,17 @@ public class RemoteFileApi extends FileScanner {
 	}
 
 	public OV_FileInfo scanAll() {
-		OV_FileInfo root = new OV_FileInfo("", null );
-		root.setScanner(this);
-		root.set_dir(true);
+		OV_FileInfo top = new OV_FileInfo(null, null );
+		top.setScanner(this);
+		top.set_dir(true);
 		try {
-			scan(root);
+			scan(top);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		// OV_FileInfo.dumpTree(root);
-		return root;
+		return top;
 	}
 
 	public void scan(OV_FileInfo node) {
@@ -180,35 +179,4 @@ public class RemoteFileApi extends FileScanner {
 		}
 		return sContent;
 	}
-
-//	@Override
-//	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo myfi) {
-//		String name = myfi.getFullPath();
-//		// String path = myfi.getName();
-//
-//		/*
-//		 * make node and scan
-//		 */
-//		// System.out.println("host="+host+" path=" + path);
-//		// OV_FileInfo myfi = new OV_FileInfo(path, parent, this);
-//		try {
-//			for (OV_FileInfo cfi : getDir(name)) {
-//				if (IgnoreFile.ignore(name)) {
-//					continue;
-//				}
-//				myfi.add(cfi);
-//				if (!cfi.is_dir()) {
-//					// myfi.add(cfi);
-//				} else {
-//					scanAll(myfi, cfi);
-//				}
-//
-//			}
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return myfi;
-//	}
-
 }

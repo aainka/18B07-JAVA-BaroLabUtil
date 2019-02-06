@@ -37,14 +37,10 @@ public class Sync {
 	String hostFun25 = "211.239.124.246:19808";
 	String hostLocal = "192.168.25.50:9292";
 
-	StringBuilder xx = new StringBuilder();
+	StringBuilder stringReport = new StringBuilder();
 	List<OV_ScanOp> scanList = null;
 
 	private void config_one() {
-		// local = new LocalFileScanner("C:/tmp/project");
-		// S:\sw-dev\eclipse-workspace-18b
-		// local = new
-		// LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
 		local = new LocalFileApi("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
 		remote = new RemoteFileApi(hostHomeOne, "/root/SynHub/18B07-BaroLabUtil");
 //		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18004-DashConsole");
@@ -52,6 +48,7 @@ public class Sync {
 	}
 
 	public DefaultTableModel getTableModel() {
+		LogConfig.setLevel("com.barolab.sync", Level.INFO);
 		System.out.println("testGui.... Called");
 		scanList = new LinkedList<OV_ScanOp>();
 		String host;
@@ -67,7 +64,7 @@ public class Sync {
 			host = hostHomeOne;
 			localDir = "C:/@SWDevelopment/workspace-java";
 		}
-		LogConfig.setLevel("com.barolab.sync", Level.FINEST);
+		
 		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
 		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
 //		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
@@ -98,7 +95,6 @@ public class Sync {
 			host = hostHomeOne;
 			localDir = "C:/@SWDevelopment/workspace-java";
 		}
-		LogConfig.setLevel("com.barolab.sync", Level.INFO);
 		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
 		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
 //		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
@@ -108,7 +104,7 @@ public class Sync {
 
 	public void syncProject(String projName, String host, String remoteDir, String localDir) {
 		System.out.println("Project=" + projName);
-		xx = new StringBuilder();
+		stringReport = new StringBuilder();
 		local = new LocalFileApi(localDir + "/" + projName);
 		remote = new RemoteFileApi(host, remoteDir + "/" + projName);
 		// config_one();
@@ -116,16 +112,7 @@ public class Sync {
 		OV_FileInfo b = remote.scanAll();
 		compareFile(a, b);
 		System.out.println("Completed");
-		System.out.println(xx.toString());
-	}
-
-	public void sync99() throws IOException {
-
-		config_one();
-		OV_FileInfo a = local.scanAll();
-		OV_FileInfo b = remote.scanAll();
-		compareFile(a, b);
-		System.out.println("Completed");
+		System.out.println(stringReport.toString());
 	}
 
 	/**
@@ -138,7 +125,6 @@ public class Sync {
 		if (dstParent == null) {
 			return; // when lock
 		}
-		log.config(srcParent.getFullPath());
 		if (srcParent.children != null) {
 			for (OV_FileInfo src : srcParent.children) {
 				OV_FileInfo dst = find(src, dstParent.children);
@@ -146,10 +132,8 @@ public class Sync {
 					report("--> X " + src.getFullPath());
 					{
 						src.read();
-						dst = new OV_FileInfo(src.getPath(), dstParent);
+						dst = new OV_FileInfo(src.getPath(), dst.getParent());
 						dst.copyFrom(src);
-//						dst.setParent(dstParent);
-//						dst.setScanner(dstParent.getScanner());
 						OV_ScanOp scanRpt = OV_ScanOp.create("RemoteCreate", scanList, src, dst);
 						if (!syncPutLock) {
 							dst = scanRpt.remotePut();
@@ -163,7 +147,7 @@ public class Sync {
 						compareTime(src, dst);
 					}
 				}
-				// isContextSame(src, dst);
+			//	 isContextSame(src, dst);
 				compareFile(src, dst); // recursive
 			}
 			if (srcParent.is_dir() && srcParent.isChildChanged()) {
@@ -247,7 +231,7 @@ public class Sync {
 	// ## Remote Sync
 	// ##################################################################
 
-	public void RemotePutGUI(int[] rownums) {
+	public void updateSelectedSync(int[] rownums) {
 		for (int rownum : rownums) {
 			OV_ScanOp rpt = scanList.get(rownum);
 			if (rpt.getOp().equals("RemoteGet")) {
@@ -264,11 +248,7 @@ public class Sync {
 	}
 
 	private void report(String msg) {
-		// log.info(msg);
-		xx.append(msg + "\n");
-//		OV_ScanRpt nr = new OV_ScanRpt();
-//		nr.setOp(msg);
-//		scanList.add(nr);
+		stringReport.append(msg + "\n");
 	}
 
 	public static void main9(String[] args) {

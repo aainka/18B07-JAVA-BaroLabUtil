@@ -23,12 +23,10 @@ public class JYButton extends Widget {
 				new JYParam(source).add("source", source).add("action", getName()).send();
 			}
 		});
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Container getComponent() {
-		// TODO Auto-generated method stub
 		return button;
 	}
 

@@ -13,7 +13,6 @@ public abstract class Widget {
 	private String name = null;
 	private JYController controller = null;
 	private Widget parent;
-//	protected Container component;
 	Widget source;
 	private List<Widget> list = new LinkedList<Widget>();
 

@@ -16,10 +16,7 @@ import com.barolab.gui.Widget;
 
 public class SyncGui implements JYController {
 
-//	Widget pan;
 	JYFrame frame;
-
-
 
 	public void build() {
 		frame = new JYFrame("2019 SynGui / SmartBuilder");
@@ -51,9 +48,6 @@ public class SyncGui implements JYController {
 	public DefaultTableModel getTableModel() {
 		Sync sn = new Sync();
 		return sn.getTableModel();
-//		String[] title = { "s1", "s2", "s3" };
-//		Object[][] contents = { { "a", "b", "c" } };
-//		return new DefaultTableModel(contents, title);
 	}
 
 	Sync sync = new Sync();
@@ -64,7 +58,9 @@ public class SyncGui implements JYController {
 		if (param.match("event", "tableSelected")) {
 			int rowNum = (int) param.get("rowNum");
 			JYTextPane textPane = (JYTextPane) Widget.findWidget(frame, "Editor");
+			if ( rowNum >=0 ) {
 			textPane.textPane.setText(sync.scanList.get(rowNum).getSrc().getText_in_file());
+			}
 
 		}
 		if (param.match("action", "scan")) {
@@ -83,22 +79,14 @@ public class SyncGui implements JYController {
 		}
 	
 		if (param.match("action", "원격전송")) {
-			System.out.println("xxx -1");
 			JYTable wtable = (JYTable) Widget.findWidget(frame, "table");
 			int[] rownum = wtable.jtable.getSelectedRows();
-			System.out.println("xxx -2");
-			sync.RemotePutGUI(rownum);
-			System.out.println("xxx -3");
-//			int rowNum = (int) param.get("rowNum");
-//			JYTextPane textPane = (JYTextPane) Widget.findWidget(frame, "Editor");
-//			textPane.textPane.setText(sync.scanList.get(rowNum).getSrc().getText_in_file());
-
+			sync.updateSelectedSync(rownum);
 		}
 	}
 
 	public static void main(String[] args) {
 		new SyncGui().build();
-
 	}
 
 }

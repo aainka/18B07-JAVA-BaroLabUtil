@@ -24,10 +24,11 @@ public class LocalFileApi extends FileScanner {
 	}
 
 	public OV_FileInfo scanAll() {
-		OV_FileInfo root = new OV_FileInfo("", null);
-		root.setScanner(this);
-		scan(root);
-		return root;
+		OV_FileInfo top = new OV_FileInfo(null, null);
+		top.setScanner(this);
+		top.set_dir(true);
+		scan(top);
+		return top;
 	}
 
 	public void scan(OV_FileInfo node) {
@@ -40,7 +41,8 @@ public class LocalFileApi extends FileScanner {
 				String pathChild = node.getFullPath() + "/" + fpChild.getName();
 				if (!IgnoreFile.ignore(pathChild)) {
 					OV_FileInfo child = null;
-					if (node.getPath().length() > 0) {
+					if (node.getPath() != null && node.getPath().length() > 0) {
+						// if bellow top
 						child = new OV_FileInfo(node.getPath() + "/" + fpChild.getName(), node );
 					} else {
 						child = new OV_FileInfo(fpChild.getName(), node );
@@ -51,34 +53,6 @@ public class LocalFileApi extends FileScanner {
 		}
 
 	}
-
-	// ##########################################################
-
-//	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo node) throws IOException {
-//
-//		if (node == null) {
-//			node = new OV_FileInfo("", parent, this);
-//		}
-//
-//		System.out.println("l.path= " + node.getFullPath());
-//		readTime(node);
-//		File myfp = new File(node.getFullPath());
-//
-//		if (myfp.isDirectory()) {
-//			node.set_dir(true);
-//			for (File fp : myfp.listFiles()) {
-//				String nPath = node.getPath() + "/" + fp.getName();
-//				if (!IgnoreFile.ignore(nPath)) {
-//					OV_FileInfo child = new OV_FileInfo(nPath, node );
-//					readTime(child);
-//					// System.out.println("l.path.c= " + getName(child) +" npath="+nPath );
-//					scanAll(node, child);
-//				}
-//			}
-//		}
-//		return node;
-//	}
-
 
 	// #########################################################################
 	// ## Read / Write
@@ -118,7 +92,8 @@ public class LocalFileApi extends FileScanner {
 
 	private void readTime(OV_FileInfo node) {
 		try {
-			File file = new File(homeDir + "/" + node.getPath());
+			String fileName = node.getFullPath();
+			File file = new File(fileName);
 			Path p = Paths.get(file.getAbsolutePath());
 			BasicFileAttributes view = Files.getFileAttributeView(p, BasicFileAttributeView.class).readAttributes();
 			FileTime fileTime = view.creationTime();
@@ -132,7 +107,7 @@ public class LocalFileApi extends FileScanner {
 
 	@Override
 	public OV_FileInfo write(OV_FileInfo node) {
-		String fileName = homeDir + "/" + node.getPath();
+		String fileName = node.getFullPath();
 		File file = new File(fileName);
 		log.info("write =" + node.json());
 		if (node.is_dir()) {
