@@ -17,16 +17,16 @@ import java.util.List;
 import lombok.extern.java.Log;
 
 @Log
-public class LocalFileScanner extends FileScanner {
+public class LocalFileApi extends FileScanner {
 
-	public LocalFileScanner(String homeDir) {
+	public LocalFileApi(String homeDir) {
 		this.homeDir = homeDir;
 	}
 
 	public OV_FileInfo scanAll() {
-		OV_FileInfo root = new OV_FileInfo("", null, this);
+		OV_FileInfo root = new OV_FileInfo("", null);
+		root.setScanner(this);
 		scan(root);
-		// OV_FileInfo.dumpTree(root);
 		return root;
 	}
 
@@ -41,9 +41,9 @@ public class LocalFileScanner extends FileScanner {
 				if (!IgnoreFile.ignore(pathChild)) {
 					OV_FileInfo child = null;
 					if (node.getPath().length() > 0) {
-						child = new OV_FileInfo(node.getPath() + "/" + fpChild.getName(), node, this);
+						child = new OV_FileInfo(node.getPath() + "/" + fpChild.getName(), node );
 					} else {
-						child = new OV_FileInfo(fpChild.getName(), node, this);
+						child = new OV_FileInfo(fpChild.getName(), node );
 					}
 					scan(child);
 				}
@@ -54,36 +54,31 @@ public class LocalFileScanner extends FileScanner {
 
 	// ##########################################################
 
-	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo node) throws IOException {
+//	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo node) throws IOException {
+//
+//		if (node == null) {
+//			node = new OV_FileInfo("", parent, this);
+//		}
+//
+//		System.out.println("l.path= " + node.getFullPath());
+//		readTime(node);
+//		File myfp = new File(node.getFullPath());
+//
+//		if (myfp.isDirectory()) {
+//			node.set_dir(true);
+//			for (File fp : myfp.listFiles()) {
+//				String nPath = node.getPath() + "/" + fp.getName();
+//				if (!IgnoreFile.ignore(nPath)) {
+//					OV_FileInfo child = new OV_FileInfo(nPath, node );
+//					readTime(child);
+//					// System.out.println("l.path.c= " + getName(child) +" npath="+nPath );
+//					scanAll(node, child);
+//				}
+//			}
+//		}
+//		return node;
+//	}
 
-		if (node == null) {
-			node = new OV_FileInfo("", parent, this);
-		}
-
-		System.out.println("l.path= " + node.getFullPath());
-		readTime(node);
-		File myfp = new File(node.getFullPath());
-
-		if (myfp.isDirectory()) {
-			node.set_dir(true);
-			for (File fp : myfp.listFiles()) {
-				String nPath = node.getPath() + "/" + fp.getName();
-				if (!IgnoreFile.ignore(nPath)) {
-					OV_FileInfo child = new OV_FileInfo(nPath, node, this);
-					readTime(child);
-					// System.out.println("l.path.c= " + getName(child) +" npath="+nPath );
-					scanAll(node, child);
-				}
-			}
-		}
-		return node;
-	}
-
-	@Override
-	public List<OV_FileInfo> getDir(String dir) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	// #########################################################################
 	// ## Read / Write
@@ -134,10 +129,6 @@ public class LocalFileScanner extends FileScanner {
 			e.printStackTrace();
 		}
 	}
-
-	// #########################################################################
-	// ## Read / Write
-	// #########################################################################
 
 	@Override
 	public OV_FileInfo write(OV_FileInfo node) {

@@ -30,7 +30,7 @@ public class TestFileRest {
 	HttpClient httpclient = new DefaultHttpClient();
 
 	Gson gson = new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-	RemoteFileScanner scanner = new RemoteFileScanner("localhost:9292", "C:/tmp");
+	RemoteFileApi scanner = new RemoteFileApi("localhost:9292", "C:/tmp");
 
 	public void test() {
 		// test_dir();

@@ -14,10 +14,7 @@ import lombok.extern.java.Log;
 @Log
 public class Sync {
 
-	// updated1234
-
 //	String remote_homeDir = "/proj7/GITHUB/18004-DashConsole/";
-//	String local_path = "C:/@SWDevelopment/workspace-java/18004-DashConsole/";
 
 //	String remote_homeDir2 = "/proj7java-workspace/18B07-BaroLabUtil/";
 	// RemoteFileScanner remote = new RemoteFileScanner(remote_host, "/proj7");
@@ -25,12 +22,6 @@ public class Sync {
 	// RemoteFileScanner remote = new RemoteFileScanner(host13F,
 	// "/root/project");
 //	RemoteFileScanner remote = new RemoteFileScanner(hostFun25, "/proj7/GITHUB/18B07-BaroLabUtil/");
-//	  syncProject("18004-DashConsole", hostFun25, "/proj7/GITHUB",
-//	  "C:/@SWDevelopment/workspace-java");
-	// syncProject("18B07-BaroLabUtil", hostFun25, "/proj7/GITHUB",
-	// "C:/@SWDevelopment/workspace-java");
-	// syncProject("18B07-BaroLabUtil", hostFun25, "/proj7/GITHUB",
-	// "S:/sw-dev/eclipse-workspace-18b");
 	// LocalFileScanner local = new LocalFileScanner("S:/tmp/18B07-BaroLabUtil");
 //	
 //
@@ -38,8 +29,8 @@ public class Sync {
 
 	boolean syncGetLock = false;
 	boolean syncPutLock = true;
-	LocalFileScanner local;
-	RemoteFileScanner remote;
+	LocalFileApi local;
+	RemoteFileApi remote;
 
 	String hostHomeOne = "110.13.71.93:9292";
 	String host13F = "100.99.14.164:9292";
@@ -47,22 +38,22 @@ public class Sync {
 	String hostLocal = "192.168.25.50:9292";
 
 	StringBuilder xx = new StringBuilder();
-	List<OV_ScanRpt> scanList = null;
+	List<OV_ScanOp> scanList = null;
 
 	private void config_one() {
 		// local = new LocalFileScanner("C:/tmp/project");
 		// S:\sw-dev\eclipse-workspace-18b
 		// local = new
 		// LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
-		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
-		remote = new RemoteFileScanner(hostHomeOne, "/root/SynHub/18B07-BaroLabUtil");
+		local = new LocalFileApi("C:/@SWDevelopment/workspace-java/18B07-BaroLabUtil/");
+		remote = new RemoteFileApi(hostHomeOne, "/root/SynHub/18B07-BaroLabUtil");
 //		local = new LocalFileScanner("C:/@SWDevelopment/workspace-java/18004-DashConsole");
 //		remote = new RemoteFileScanner(hostHomeOne, "/root/project/18004-DashConsole");
 	}
 
 	public DefaultTableModel getTableModel() {
 		System.out.println("testGui.... Called");
-		scanList = new LinkedList<OV_ScanRpt>();
+		scanList = new LinkedList<OV_ScanOp>();
 		String host;
 		String localDir;
 		if (true) {
@@ -76,7 +67,7 @@ public class Sync {
 			host = hostHomeOne;
 			localDir = "C:/@SWDevelopment/workspace-java";
 		}
-		LogConfig.setLevel("com.barolab.sync", Level.INFO);
+		LogConfig.setLevel("com.barolab.sync", Level.FINEST);
 		// LogConfig.setLevel("com.barolab.sync.*", Level.ALL);
 		syncProject("18B07-BaroLabUtil", host, "/root/SynHub", localDir);
 //		syncProject("19A01-PyRestfulApi", host, "/root/SynHub", localDir);
@@ -85,7 +76,7 @@ public class Sync {
 		String[] columnName = { "File", "Mode", "Date" };
 		DefaultTableModel model = new DefaultTableModel(columnName, 0);
 
-		for (OV_ScanRpt trace : scanList) {
+		for (OV_ScanOp trace : scanList) {
 			Object[] objList = new Object[] { trace.getSrc().getPath(), trace.getOp(), trace.getSrc().getUpdated() };
 			model.addRow(objList);
 		}
@@ -118,8 +109,8 @@ public class Sync {
 	public void syncProject(String projName, String host, String remoteDir, String localDir) {
 		System.out.println("Project=" + projName);
 		xx = new StringBuilder();
-		local = new LocalFileScanner(localDir + "/" + projName);
-		remote = new RemoteFileScanner(host, remoteDir + "/" + projName);
+		local = new LocalFileApi(localDir + "/" + projName);
+		remote = new RemoteFileApi(host, remoteDir + "/" + projName);
 		// config_one();
 		OV_FileInfo a = local.scanAll();
 		OV_FileInfo b = remote.scanAll();
@@ -154,7 +145,12 @@ public class Sync {
 				if (dst == null) {
 					report("--> X " + src.getFullPath());
 					{
-						OV_ScanRpt scanRpt = OV_ScanRpt.create("Remote Create", scanList, src, dst);
+						src.read();
+						dst = new OV_FileInfo(src.getPath(), dstParent);
+						dst.copyFrom(src);
+//						dst.setParent(dstParent);
+//						dst.setScanner(dstParent.getScanner());
+						OV_ScanOp scanRpt = OV_ScanOp.create("RemoteCreate", scanList, src, dst);
 						if (!syncPutLock) {
 							dst = scanRpt.remotePut();
 							if (dst != null) {
@@ -171,7 +167,7 @@ public class Sync {
 				compareFile(src, dst); // recursive
 			}
 			if (srcParent.is_dir() && srcParent.isChildChanged()) {
-				OV_ScanRpt scanRpt = OV_ScanRpt.create("Dir Update", scanList, srcParent, dstParent);
+				OV_ScanOp scanRpt = OV_ScanOp.create("Dir Update", scanList, srcParent, dstParent);
 				// remotePut(srcParent, dstParent.getScanner()); // overwrite time
 				scanRpt.remotePut();
 			}
@@ -225,7 +221,8 @@ public class Sync {
 				report("--> " + src.getFullPath() + ", t=" + src.getUpdated());
 				log.info("--> " + src.getFullPath() + ", t=" + diff);
 				{
-					OV_ScanRpt scanRpt = OV_ScanRpt.create("Remote Put", scanList, src, dst);
+					src.read();
+					OV_ScanOp scanRpt = OV_ScanOp.create("RemotePut", scanList, src, dst);
 					if (!syncPutLock) {
 						dst = scanRpt.remotePut();
 						if (dst != null) {
@@ -235,10 +232,13 @@ public class Sync {
 				}
 			} else {
 				report("<-- " + src.getFullPath() + ", s=" + src.getUpdated() + " d=" + dst.getUpdated());
-				{
-					OV_ScanRpt.create("Get", scanList, src, dst);
+				if (!dst.is_dir()) {
+					dst.read();
 				}
-				remoteGet(dst, src.getScanner()); // @ 로컬 타입도 업데이트 해야 하나?
+				OV_ScanOp rpt = OV_ScanOp.create("RemoteGet", scanList, src, dst);
+				if (!syncGetLock) {
+					rpt.remoteGet();
+				}
 			}
 		}
 	}
@@ -247,23 +247,18 @@ public class Sync {
 	// ## Remote Sync
 	// ##################################################################
 
-	private void remoteGet(OV_FileInfo dst, FileScanner scanner) {
-		if (syncGetLock) {
-			return;
-		}
-		log.info("<< " + dst.getFullPath() + " dir?" + dst.is_dir());
-		if (!dst.is_dir()) {
-			dst.read();
-		}
-		scanner.write(dst);
-//		dst.getParent().setChildChanged(true);
-	}
-
 	public void RemotePutGUI(int[] rownums) {
 		for (int rownum : rownums) {
-			OV_ScanRpt rpt = scanList.get(rownum);
-			System.out.println("rpt = "+rpt.getSrc().getFullPath());
-			  rpt.remotePut();
+			OV_ScanOp rpt = scanList.get(rownum);
+			if (rpt.getOp().equals("RemoteGet")) {
+				rpt.remoteGet();
+			}
+			if (rpt.getOp().equals("RemotePut")) {
+				rpt.remotePut();
+			}
+			if (rpt.getOp().equals("RemoteCreate")) {
+				rpt.remotePut();
+			}
 		}
 
 	}

@@ -18,20 +18,17 @@ public class OV_FileInfo {
 	private Date created;
 	private boolean is_dir;
 	private String text_in_file;
-	transient LinkedList<OV_FileInfo> children;
+	transient LinkedList<OV_FileInfo> children= new LinkedList<OV_FileInfo>();
 	transient private OV_FileInfo parent;
 	transient private FileScanner scanner;
 	transient private boolean childChanged = false;
 
-	public OV_FileInfo(String path, OV_FileInfo parent, FileScanner fileScanner) {
+	public OV_FileInfo(String path, OV_FileInfo parent) {
 		this.path = path;
-		this.scanner = fileScanner;
 		if (parent != null) {
 			this.parent = parent;
-			if (parent.children == null) {
-				parent.children = new LinkedList<OV_FileInfo>();
-			}
-			parent.children.add(this);
+			this.parent.children.add(this);
+			this.scanner = this.parent.getScanner();
 		}
 		File fp = new File(this.getFullPath());
 		if (fp.isDirectory()) {
@@ -39,9 +36,9 @@ public class OV_FileInfo {
 		}
 	}
 
-	public OV_FileInfo() {
-		// TODO Auto-generated constructor stub
-	}
+//	public OV_FileInfo() {
+//		// TODO Auto-generated constructor stub
+//	}
 
 	// #################################################################
 	// ## Naming
@@ -59,7 +56,7 @@ public class OV_FileInfo {
 		}
 	}
 
-	public String getFullPath(RemoteFileScanner scanner0) {
+	public String getFullPath(RemoteFileApi scanner0) {
 		if (path == null || path.length() <= 0) {
 			return scanner0.homeDir;
 		} else {
@@ -96,16 +93,23 @@ public class OV_FileInfo {
 		child.setScanner(scanner);
 	}
 
-	public void read() {
-		scanner.read(this);
-	}
-
 	public void copyFrom(OV_FileInfo a) {
 		this.path = a.path;
 		this.created = a.created;
 		this.updated = a.updated;
 		this.text_in_file = a.text_in_file;
+	}
 
+	// ############################################################
+	// ## scanner related
+	// ############################################################
+
+	public void read() {
+		scanner.read(this);
+	}
+
+	public void write() {
+		scanner.write(this);
 	}
 
 }

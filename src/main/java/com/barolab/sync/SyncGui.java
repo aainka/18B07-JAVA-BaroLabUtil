@@ -71,6 +71,7 @@ public class SyncGui implements JYController {
 			JYTable wtable = (JYTable) Widget.findWidget(frame, "table");
 			wtable.jtable.setModel(sync.getTableModel());
 			wtable.jtable.updateUI();
+		//	new JYConfirm(frame).setMessage("Scan OK").show();
 		}
 		if (param.match("action", "action")) {
 			JYTable wtable = (JYTable) Widget.findWidget(frame, "table");

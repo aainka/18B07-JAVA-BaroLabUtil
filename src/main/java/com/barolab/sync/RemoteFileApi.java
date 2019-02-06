@@ -22,7 +22,7 @@ import com.google.gson.reflect.TypeToken;
 import lombok.extern.java.Log;
 
 @Log
-public class RemoteFileScanner extends FileScanner {
+public class RemoteFileApi extends FileScanner {
 
 //	TestFileRest httpApi = null;
 	HttpClient httpclient = new DefaultHttpClient();
@@ -30,13 +30,14 @@ public class RemoteFileScanner extends FileScanner {
 
 	private String host;
 
-	public RemoteFileScanner(String host, String homeDir) {
+	public RemoteFileApi(String host, String homeDir) {
 		this.host = host;
 		this.homeDir = homeDir;
 	}
 
 	public OV_FileInfo scanAll() {
-		OV_FileInfo root = new OV_FileInfo("", null, this);
+		OV_FileInfo root = new OV_FileInfo("", null );
+		root.setScanner(this);
 		root.set_dir(true);
 		try {
 			scan(root);
@@ -180,34 +181,34 @@ public class RemoteFileScanner extends FileScanner {
 		return sContent;
 	}
 
-	@Override
-	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo myfi) {
-		String name = myfi.getFullPath();
-		// String path = myfi.getName();
-
-		/*
-		 * make node and scan
-		 */
-		// System.out.println("host="+host+" path=" + path);
-		// OV_FileInfo myfi = new OV_FileInfo(path, parent, this);
-		try {
-			for (OV_FileInfo cfi : getDir(name)) {
-				if (IgnoreFile.ignore(name)) {
-					continue;
-				}
-				myfi.add(cfi);
-				if (!cfi.is_dir()) {
-					// myfi.add(cfi);
-				} else {
-					scanAll(myfi, cfi);
-				}
-
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return myfi;
-	}
+//	@Override
+//	public OV_FileInfo scanAll(OV_FileInfo parent, OV_FileInfo myfi) {
+//		String name = myfi.getFullPath();
+//		// String path = myfi.getName();
+//
+//		/*
+//		 * make node and scan
+//		 */
+//		// System.out.println("host="+host+" path=" + path);
+//		// OV_FileInfo myfi = new OV_FileInfo(path, parent, this);
+//		try {
+//			for (OV_FileInfo cfi : getDir(name)) {
+//				if (IgnoreFile.ignore(name)) {
+//					continue;
+//				}
+//				myfi.add(cfi);
+//				if (!cfi.is_dir()) {
+//					// myfi.add(cfi);
+//				} else {
+//					scanAll(myfi, cfi);
+//				}
+//
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return myfi;
+//	}
 
 }
