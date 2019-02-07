@@ -2,7 +2,6 @@ package com.barolab.gui;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -26,17 +25,17 @@ public class JYTable extends Widget {
 		bb.add("cc");
 		model.setColumnIdentifiers(bb);
 		jtable.setModel(model);
-	//	jtable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-	//	jtable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		// jtable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		// jtable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		jtable.setAutoCreateColumnsFromModel(false);
 
 		jtable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
+			//@Override
 			public void valueChanged(ListSelectionEvent arg0) {
 				if (arg0.getValueIsAdjusting()) {
 					return;
 				}
-				System.out.println("valueChanged."+arg0.getFirstIndex());
+				System.out.println("valueChanged." + arg0.getFirstIndex());
 				new JYParam(source) //
 						.add("event", "tableSelected") //
 						.add("rowNum", jtable.getSelectedRow()) //
@@ -61,15 +60,13 @@ public class JYTable extends Widget {
 		return this;
 	}
 
-
-
 	public void build(final JYController controller) {
 
 	}
 
 	public Widget columnWidths(int[] widths) {
-		int index =0;
-		for ( int width : widths) {
+		int index = 0;
+		for (int width : widths) {
 			jtable.getColumnModel().getColumn(index++).setPreferredWidth(width);
 		}
 		// TODO Auto-generated method stub

@@ -132,7 +132,7 @@ public class Sync {
 					report("--> X " + src.getFullPath());
 					{
 						src.read();
-						dst = new OV_FileInfo(src.getPath(), dst.getParent());
+						dst = new OV_FileInfo(src.getPath(), dstParent);
 						dst.copyFrom(src);
 						OV_ScanOp scanRpt = OV_ScanOp.create("RemoteCreate", scanList, src, dst);
 						if (!syncPutLock) {

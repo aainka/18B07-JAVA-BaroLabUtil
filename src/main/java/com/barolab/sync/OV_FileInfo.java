@@ -16,9 +16,10 @@ public class OV_FileInfo {
 	private String path;
 	private Date updated;
 	private Date created;
+	private int length;
 	private boolean is_dir;
 	private String text_in_file;
-	transient LinkedList<OV_FileInfo> children= new LinkedList<OV_FileInfo>();
+	transient LinkedList<OV_FileInfo> children = new LinkedList<OV_FileInfo>();
 	transient private OV_FileInfo parent;
 	transient private FileScanner scanner;
 	transient private boolean childChanged = false;
@@ -45,7 +46,7 @@ public class OV_FileInfo {
 	}
 
 	public String getFullPath() {
-		if (path == null || path.length() <= 0 ) {
+		if (path == null || path.length() <= 0) {
 			return scanner.homeDir;
 		} else {
 			return scanner.homeDir + "/" + path;
@@ -93,6 +94,7 @@ public class OV_FileInfo {
 		this.path = a.path;
 		this.created = a.created;
 		this.updated = a.updated;
+		this.length = a.length;
 		this.text_in_file = a.text_in_file;
 	}
 
